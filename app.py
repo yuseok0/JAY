@@ -2,10 +2,12 @@ import os
 import csv
 import io
 import json
+import re
 import shutil
 import tempfile
 import threading
 import time as _time
+import traceback
 import uuid
 from datetime import date, datetime, timedelta
 
@@ -176,6 +178,80 @@ def fetch_account_meta(account_id: str):
         }
     _account_meta_cache[account_id] = meta
     return meta
+
+
+def _parse_target(campaign_name):
+    """campaign_name → 'Adults' / 'Young Learners' / 'Kinder' / '기타' (프론트 parseTarget 동일)"""
+    c = (campaign_name or "").lower()
+    if "kinder" in c:
+        return "Kinder"
+    if "adults" in c:
+        return "Adults"
+    if "younglearners" in c or "youngleaners" in c:
+        return "Young Learners"
+    if "parents" in c:
+        return "Kinder"
+    return "기타"
+
+
+def _parse_targeting_main(campaign_name, adset_name):
+    """메인 Targeting tag만 (수정자 제외) — Creative 추출용. 'A+'/'LAL'/'PT'/'Ilsan'/None"""
+    src = ((adset_name or "") + " " + (campaign_name or "")).lower()
+    if re.search(r"\ba\+|aplus", src):
+        return "A+"
+    if re.search(r"\blal", src):
+        return "LAL"
+    if re.search(r"prospect|\bpt\b", src):
+        return "PT"
+    if "ilsan" in src:
+        return "Ilsan"
+    return None
+
+
+def _parse_targeting(campaign_name, adset_name):
+    """메인 tag + 수정자 결합 (프론트 parseTargeting 동일)"""
+    main = _parse_targeting_main(campaign_name, adset_name)
+    if not main:
+        last = (adset_name or "").split("-")
+        return last[-1] if last and last[-1] else "기타"
+    src = ((adset_name or "") + " " + (campaign_name or "")).lower()
+    mods = []
+    if "primary" in src:
+        mods.append("Primary")
+    if "summer" in src:
+        mods.append("summer")
+    if "winter" in src:
+        mods.append("winter")
+    if re.search(r"\bbau\b", src) and not mods:
+        mods.append("BAU")
+    return f"{main} - {', '.join(mods)}" if mods else main
+
+
+def _parse_creative(ad_name, main_tag):
+    """ad_name에서 메인 tag 뒤 부분 짧은 라벨로 추출. 못 찾으면 마지막 segment."""
+    if not ad_name:
+        return ""
+    if not main_tag:
+        parts = ad_name.split("-")
+        return parts[-1] if parts else ad_name
+    pattern = re.escape(main_tag)
+    m = re.search(pattern, ad_name, re.IGNORECASE)
+    if not m:
+        parts = ad_name.split("-")
+        return parts[-1] if parts else ad_name
+    after = ad_name[m.end():]
+    after = re.sub(r"^[-_]+", "", after)
+    return after or ad_name
+
+
+def _annotate_row_for_export(row):
+    """행에 _target / _targeting / _targeting_main / _creative 부여."""
+    row["_target"] = _parse_target(row.get("campaign_name"))
+    main = _parse_targeting_main(row.get("campaign_name"), row.get("adset_name"))
+    row["_targeting_main"] = main or "기타"
+    row["_targeting"] = _parse_targeting(row.get("campaign_name"), row.get("adset_name"))
+    row["_creative"] = _parse_creative(row.get("ad_name"), main) or (row.get("ad_name") or "")
+    return row
 
 
 def _enrich_row(row):
@@ -1303,9 +1379,63 @@ def api_report_download(job_id):
     )
 
 
+def _agg_metrics_full(rows):
+    """프론트 aggregateMetrics와 동일. video_views는 모두 null이면 None."""
+    imps = sum(_to_float(r.get("impressions")) for r in rows)
+    clicks = sum(_to_float(r.get("clicks")) for r in rows)
+    spend = sum(_to_float(r.get("spend")) for r in rows)
+    conv = sum(_to_float(r.get("conversions") or 0) for r in rows)
+    has_video = any(r.get("video_views") is not None for r in rows)
+    if has_video:
+        views = sum(_to_float(r.get("video_views") or 0) for r in rows if r.get("video_views") is not None)
+    else:
+        views = None
+    return {
+        "impressions": imps,
+        "clicks": clicks,
+        "ctr": (clicks / imps * 100) if imps else 0.0,
+        "video_views": int(views) if (views is not None) else None,
+        "vtr": (views / imps * 100) if (views is not None and imps) else None,
+        "conversions": int(conv),
+        "cvr": (conv / imps * 100) if imps else 0.0,
+        "spend": spend,
+    }
+
+
+def _dow_kr(date_str):
+    """YYYY-MM-DD → 한글 요일(월/화/.../일)."""
+    try:
+        d = datetime.strptime(date_str, "%Y-%m-%d").date()
+    except (ValueError, TypeError):
+        return ""
+    return ["월", "화", "수", "목", "금", "토", "일"][d.weekday()]
+
+
+def _safe_sheet_name(name):
+    """Excel 시트 이름 sanitize: 최대 31자, 금지문자 제거."""
+    if not name:
+        return "Sheet"
+    bad = set('/\\?*:[]')
+    out = "".join("_" if c in bad else c for c in str(name))
+    return out[:31] or "Sheet"
+
+
 @app.route("/api/view.xlsx")
 def api_view_xlsx():
-    """현재 뷰 그대로 단순 xlsx 출력: 주간 인사이트 + 데이터 표 + 타겟×에셋 3개 시트."""
+    """현재 뷰 그대로 단순 xlsx 출력. 전체 본문 try/except로 감싸 에러 추적 강화."""
+    try:
+        return _build_view_xlsx_response()
+    except Exception as e:
+        tb = traceback.format_exc()
+        print(f"[view.xlsx] FATAL: {e}\n{tb}", flush=True)
+        return jsonify({
+            "error": f"Excel 생성 실패: {e}",
+            "trace_tail": tb.splitlines()[-10:],
+        }), 500
+
+
+def _build_view_xlsx_response():
+    """원래 api_view_xlsx 본문. 새 시트 구조: 주간 인사이트 + SUMMARY + 일자별_[Target] per Target."""
     try:
         from openpyxl import Workbook
         from openpyxl.styles import Alignment, Font, PatternFill, Border, Side
@@ -1417,97 +1547,200 @@ def api_view_xlsx():
         for col, w in [("A", 18), ("B", 16), ("C", 16), ("D", 16), ("E", 12)]:
             ws1.column_dimensions[col].width = w
 
-    # === Sheet 2: 데이터 표 ===
-    ws2 = wb.create_sheet("데이터 표")
-    period_data = fetch_insights(since=since, until=until, level=level, account_id=resolved)
+    # === 광고 단위 일별 데이터 fetch (모든 후속 시트 공용) ===
+    period_data = fetch_insights(since=since, until=until, level="ad", account_id=resolved)
     if "error" in period_data:
-        ws2.cell(row=1, column=1, value=f"오류: {period_data['error']}").font = Font(name="Arial", color="C0392B")
+        # 에러 시 SUMMARY 시트 하나만 만들고 에러 메시지 기록
+        ws_err = wb.create_sheet("ERROR")
+        ws_err.cell(row=1, column=1, value=f"데이터 로드 실패: {period_data['error']}").font = Font(name="Arial", color="C0392B", bold=True)
     else:
-        dim_cols = []
-        if level == "ad":
-            dim_cols = [("날짜", "date_start"), ("캠페인", "campaign_name"), ("광고세트", "adset_name"), ("광고", "ad_name")]
-        elif level == "adset":
-            dim_cols = [("캠페인", "campaign_name"), ("광고세트", "adset_name")]
-        elif level == "campaign":
-            dim_cols = [("캠페인", "campaign_name")]
-        else:
-            dim_cols = [("계정", "account_id")]
+        all_rows = period_data["data"]
+        # 모든 행에 _target/_targeting/_targeting_main/_creative 부여
+        for r in all_rows:
+            _annotate_row_for_export(r)
 
-        headers = [h[0] for h in dim_cols] + metric_labels
-        write_header_row(ws2, headers, row=1)
+        # ===== Sheet 2: SUMMARY (Target × Targeting × Creative) =====
+        ws2 = wb.create_sheet("SUMMARY")
+        bold_font = Font(name="Arial", size=10, bold=True)
+        white_bold = Font(name="Arial", size=10, bold=True, color="FFFFFF")
+        targeting_fill = PatternFill("solid", fgColor="EEF3F8")
+        targeting_subtotal_fill = PatternFill("solid", fgColor="E8F1FD")
+        target_subtotal_fill = PatternFill("solid", fgColor="D6E5FA")
+        total_fill = PatternFill("solid", fgColor="5B6C7E")
 
-        for r_idx, row in enumerate(period_data["data"], start=2):
-            for c_idx, (_, key) in enumerate(dim_cols, start=1):
-                c = ws2.cell(row=r_idx, column=c_idx, value=row.get(key, ""))
-                c.font = base_font
-                c.border = border
-            for offset, key in enumerate(metric_keys):
-                c = ws2.cell(row=r_idx, column=len(dim_cols) + 1 + offset)
-                write_metric(c, row.get(key), key)
+        write_header_row(ws2, ["Target", "Targeting", "Creative"] + metric_labels, row=1)
 
-        # 열 너비
-        for i, (label, _) in enumerate(dim_cols, start=1):
-            ws2.column_dimensions[get_column_letter(i)].width = 28 if "광고" in label or "캠페인" in label else 12
-        for i in range(len(dim_cols) + 1, len(dim_cols) + 1 + len(metric_keys)):
+        # 그룹: Target → Targeting → {rows, creatives: {short_label: {rows, full}}}
+        grouped = {}
+        for r in all_rows:
+            t = r.get("_target") or "기타"
+            tg = r.get("_targeting") or "기타"
+            cr = r.get("_creative") or (r.get("ad_name") or "(이름 없음)")
+            full = r.get("ad_name") or cr
+            grouped.setdefault(t, {})
+            if tg not in grouped[t]:
+                grouped[t][tg] = {"rows": [], "creatives": {}}
+            grouped[t][tg]["rows"].append(r)
+            if cr not in grouped[t][tg]["creatives"]:
+                grouped[t][tg]["creatives"][cr] = {"rows": [], "full": full}
+            grouped[t][tg]["creatives"][cr]["rows"].append(r)
+
+        target_order = ["Adults", "Young Learners", "Kinder"]
+        def _t_sort_key(t):
+            try:
+                return (target_order.index(t), t)
+            except ValueError:
+                return (999, t)
+        sorted_targets = sorted(grouped.keys(), key=_t_sort_key)
+
+        try:
+            from openpyxl.comments import Comment
+        except ImportError:
+            Comment = None
+
+        row_idx = 2
+        for target in sorted_targets:
+            targeting_map = grouped[target]
+            tg_keys = sorted(targeting_map.keys())
+            target_first_row = row_idx
+
+            for tg in tg_keys:
+                entry = targeting_map[tg]
+                tg_metrics = _agg_metrics_full(entry["rows"])
+
+                # Targeting 헤더 행 — 메트릭은 Targeting 합계
+                ws2.cell(row=row_idx, column=1, value=(target if row_idx == target_first_row else "")).font = base_font
+                ws2.cell(row=row_idx, column=2, value=tg).font = bold_font
+                ws2.cell(row=row_idx, column=3, value="")
+                for i, key in enumerate(metric_keys):
+                    write_metric(ws2.cell(row=row_idx, column=4 + i), tg_metrics.get(key), key)
+                for col in range(1, 4 + len(metric_keys)):
+                    ws2.cell(row=row_idx, column=col).fill = targeting_fill
+                row_idx += 1
+
+                # Creative 행들 (지출 큰 순)
+                cr_entries = []
+                for cr_name, cr_data in entry["creatives"].items():
+                    cm = _agg_metrics_full(cr_data["rows"])
+                    cr_entries.append((cr_name, cr_data["full"], cm))
+                cr_entries.sort(key=lambda x: -(x[2].get("spend") or 0))
+
+                for cr_name, cr_full, cm in cr_entries:
+                    name_cell = ws2.cell(row=row_idx, column=3, value=cr_name)
+                    name_cell.font = base_font
+                    if Comment and cr_full and cr_full != cr_name:
+                        name_cell.comment = Comment(cr_full, "Auto")
+                    for i, key in enumerate(metric_keys):
+                        write_metric(ws2.cell(row=row_idx, column=4 + i), cm.get(key), key)
+                    row_idx += 1
+
+                # Sub Total per Targeting
+                ws2.cell(row=row_idx, column=3, value=f"Sub Total ({tg})").font = bold_font
+                for i, key in enumerate(metric_keys):
+                    write_metric(ws2.cell(row=row_idx, column=4 + i), tg_metrics.get(key), key)
+                for col in range(1, 4 + len(metric_keys)):
+                    ws2.cell(row=row_idx, column=col).fill = targeting_subtotal_fill
+                    ws2.cell(row=row_idx, column=col).font = bold_font
+                row_idx += 1
+
+            # Sub Total per Target
+            target_all_rows = [r for tg_data in targeting_map.values() for r in tg_data["rows"]]
+            target_metrics = _agg_metrics_full(target_all_rows)
+            ws2.cell(row=row_idx, column=2, value=f"Sub Total ({target})").font = bold_font
+            for i, key in enumerate(metric_keys):
+                write_metric(ws2.cell(row=row_idx, column=4 + i), target_metrics.get(key), key)
+            for col in range(1, 4 + len(metric_keys)):
+                ws2.cell(row=row_idx, column=col).fill = target_subtotal_fill
+                ws2.cell(row=row_idx, column=col).font = bold_font
+            row_idx += 1
+
+        # 전체 Total
+        total_metrics = _agg_metrics_full(all_rows)
+        ws2.cell(row=row_idx, column=1, value="Total").font = white_bold
+        for i, key in enumerate(metric_keys):
+            write_metric(ws2.cell(row=row_idx, column=4 + i), total_metrics.get(key), key)
+        for col in range(1, 4 + len(metric_keys)):
+            ws2.cell(row=row_idx, column=col).fill = total_fill
+            ws2.cell(row=row_idx, column=col).font = white_bold
+
+        # 컬럼 너비
+        ws2.column_dimensions['A'].width = 14
+        ws2.column_dimensions['B'].width = 18
+        ws2.column_dimensions['C'].width = 36
+        for i in range(4, 4 + len(metric_keys)):
             ws2.column_dimensions[get_column_letter(i)].width = 12
 
-    # === Sheet 3: 타겟×에셋 ===
-    ws3 = wb.create_sheet("타겟×에셋")
-    bd = _build_breakdown(resolved, since, until, overrides)
-    if "error" in bd:
-        ws3.cell(row=1, column=1, value=f"오류: {bd['error']}").font = Font(name="Arial", color="C0392B")
-    else:
-        write_header_row(ws3, [
-            "레벨", "이름", "일정", "예산", "누적 spend",
-            "진행률", "소진률", "노출", "클릭", "CTR", "VIEW", "VTR", "전환", "CVR", "지출",
-        ], row=1)
+        # ===== Sheet 3+: 일자별_[Target] per Target (stacked panels) =====
+        # 공통 fills
+        group_header_fill = PatternFill("solid", fgColor="5B6C7E")
+        metric_header_fill = PatternFill("solid", fgColor="7A8A9C")
+        date_total_fill = PatternFill("solid", fgColor="FFF3A8")
+        weekend_red = Font(name="Arial", size=10, color="C0392B")
 
-        camp_fill = PatternFill("solid", fgColor="D6E5FA")
-        adset_fill = PatternFill("solid", fgColor="EEF3F8")
-        bold = Font(name="Arial", size=10, bold=True)
+        all_dates = sorted({r.get("date_start") for r in all_rows if r.get("date_start")})
 
-        r = 2
-        for c in bd["campaigns"]:
-            sched = f'{c["schedule"]["start"][:10] if c["schedule"]["start"] else "-"} ~ {c["schedule"]["stop"][:10] if c["schedule"]["stop"] else "진행중"}'
-            if c["schedule"].get("override"):
-                sched += " (수동)"
-            total_b = c["budget"]["total"]
-            budget_str = f'{int(total_b):,}원' if total_b else "-"
-            ws3.cell(row=r, column=1, value="캠페인").font = bold
-            ws3.cell(row=r, column=2, value=c["name"]).font = bold
-            ws3.cell(row=r, column=3, value=sched).font = base_font
-            ws3.cell(row=r, column=4, value=budget_str).font = base_font
-            cs = ws3.cell(row=r, column=5, value=c["progress"]["cumul_spend"])
-            cs.font = base_font; cs.number_format = '#,##0"원"'
-            tp = ws3.cell(row=r, column=6, value=(c["progress"]["time_pct"] / 100.0) if c["progress"]["time_pct"] is not None else None)
-            tp.font = base_font; tp.number_format = "0.0%"
-            sp = ws3.cell(row=r, column=7, value=(c["progress"]["spend_pct"] / 100.0) if c["progress"]["spend_pct"] is not None else None)
-            sp.font = base_font; sp.number_format = "0.0%"
-            for i, key in enumerate(metric_keys):
-                write_metric(ws3.cell(row=r, column=8 + i), c["metrics"].get(key), key)
-            for col in range(1, 16):
-                ws3.cell(row=r, column=col).fill = camp_fill
-            r += 1
+        for target in sorted_targets:
+            target_rows = [r for r in all_rows if r.get("_target") == target]
+            if not target_rows:
+                continue
+            sheet_name = _safe_sheet_name(f"일자별_{target}")
+            wsd = wb.create_sheet(sheet_name)
 
-            for aset in c["adsets"]:
-                ws3.cell(row=r, column=1, value="  광고세트").font = base_font
-                ws3.cell(row=r, column=2, value="  " + (aset.get("name") or "")).font = base_font
-                for i, key in enumerate(metric_keys):
-                    write_metric(ws3.cell(row=r, column=8 + i), aset["metrics"].get(key), key)
-                for col in range(1, 16):
-                    ws3.cell(row=r, column=col).fill = adset_fill
-                r += 1
+            r_idx = 1
 
-                for ad in aset["ads"]:
-                    ws3.cell(row=r, column=1, value="    광고").font = base_font
-                    ws3.cell(row=r, column=2, value="    " + (ad.get("name") or "")).font = base_font
-                    for i, key in enumerate(metric_keys):
-                        write_metric(ws3.cell(row=r, column=8 + i), ad["metrics"].get(key), key)
-                    r += 1
+            # Panel A: Date × [Target Total + 각 Targeting]
+            targetings_in = sorted({r.get("_targeting") for r in target_rows if r.get("_targeting")})
+            groups_a = [{"label": f"{target} Total", "full": None, "rows": target_rows}]
+            for tg in targetings_in:
+                groups_a.append({
+                    "label": tg,
+                    "full": None,
+                    "rows": [r for r in target_rows if r.get("_targeting") == tg],
+                })
+            r_idx = _write_daily_panel(
+                wsd, r_idx,
+                f"📅 Daily by Targeting — {target}",
+                groups_a, all_dates,
+                base_font, bold_font, write_metric,
+                group_header_fill, metric_header_fill, date_total_fill, weekend_red,
+                Comment,
+            )
+            r_idx += 2  # 빈 행 2개
 
-        widths = [10, 40, 24, 14, 14, 10, 10, 11, 10, 10, 11, 10, 10, 10, 12]
-        for i, w in enumerate(widths, start=1):
-            ws3.column_dimensions[get_column_letter(i)].width = w
+            # Panel B per Targeting: Date × [Targeting Total + 각 Creative]
+            for tg in targetings_in:
+                tg_rows = [r for r in target_rows if r.get("_targeting") == tg]
+                # Creative 추출
+                creative_map = {}  # short → {rows, full}
+                for r in tg_rows:
+                    cr = r.get("_creative") or (r.get("ad_name") or "(이름 없음)")
+                    full = r.get("ad_name") or cr
+                    if cr not in creative_map:
+                        creative_map[cr] = {"rows": [], "full": full}
+                    creative_map[cr]["rows"].append(r)
+                creative_keys = sorted(creative_map.keys(),
+                                       key=lambda c: -(_agg_metrics_full(creative_map[c]["rows"]).get("spend") or 0))
+
+                groups_b = [{"label": f"{tg} Total", "full": None, "rows": tg_rows}]
+                for cr in creative_keys:
+                    groups_b.append({
+                        "label": cr,
+                        "full": creative_map[cr]["full"],
+                        "rows": creative_map[cr]["rows"],
+                    })
+                r_idx = _write_daily_panel(
+                    wsd, r_idx,
+                    f"📅 Daily by Creative — {target} > {tg}",
+                    groups_b, all_dates,
+                    base_font, bold_font, write_metric,
+                    group_header_fill, metric_header_fill, date_total_fill, weekend_red,
+                    Comment,
+                )
+                r_idx += 2
+
+            # 컬럼 너비
+            wsd.column_dimensions['A'].width = 12
+            wsd.column_dimensions['B'].width = 6
 
     # 저장 & 응답
     tmp = tempfile.NamedTemporaryFile(suffix=".xlsx", delete=False)
@@ -1524,6 +1757,96 @@ def api_view_xlsx():
         as_attachment=True,
         download_name=filename,
     )
+
+
+def _write_daily_panel(ws, start_row, title, groups, dates,
+                       base_font, bold_font, write_metric,
+                       group_header_fill, metric_header_fill, date_total_fill, weekend_red,
+                       Comment):
+    """일자별 데이터 패널 1개 작성. Date × [Group Total + 각 sub-group] 형태. 반환: 다음 사용 가능 row."""
+    from openpyxl.styles import Alignment, Font, PatternFill
+    metric_keys = ["impressions", "clicks", "ctr", "video_views", "vtr", "conversions", "cvr", "spend"]
+    metric_labels = ["IMPs", "Click", "CTR", "View", "VTR", "전환", "CVR", "Spend"]
+    M = len(metric_keys)
+    white_bold = Font(name="Arial", size=10, bold=True, color="FFFFFF")
+
+    r = start_row
+
+    # 패널 타이틀
+    title_cell = ws.cell(row=r, column=1, value=title)
+    title_cell.font = Font(name="Arial", size=11, bold=True)
+    r += 1
+
+    # 그룹 헤더 행 (Date, 요일은 rowspan 2, 그룹 라벨은 colspan M)
+    ws.cell(row=r, column=1, value="Date").font = white_bold
+    ws.cell(row=r, column=1).fill = group_header_fill
+    ws.cell(row=r, column=1).alignment = Alignment(horizontal="center")
+    ws.merge_cells(start_row=r, start_column=1, end_row=r + 1, end_column=1)
+
+    ws.cell(row=r, column=2, value="요일").font = white_bold
+    ws.cell(row=r, column=2).fill = group_header_fill
+    ws.cell(row=r, column=2).alignment = Alignment(horizontal="center")
+    ws.merge_cells(start_row=r, start_column=2, end_row=r + 1, end_column=2)
+
+    col = 3
+    for g in groups:
+        ws.merge_cells(start_row=r, start_column=col, end_row=r, end_column=col + M - 1)
+        cell = ws.cell(row=r, column=col, value=g["label"])
+        cell.font = white_bold
+        cell.fill = group_header_fill
+        cell.alignment = Alignment(horizontal="center", vertical="center")
+        if Comment and g.get("full") and g["full"] != g["label"]:
+            cell.comment = Comment(g["full"], "Auto")
+        col += M
+    r += 1
+
+    # 메트릭 라벨 행
+    col = 3
+    for g in groups:
+        for lbl in metric_labels:
+            cell = ws.cell(row=r, column=col, value=lbl)
+            cell.font = white_bold
+            cell.fill = metric_header_fill
+            cell.alignment = Alignment(horizontal="center")
+            col += 1
+    r += 1
+
+    # Total 행 (전체 기간 합계)
+    ws.cell(row=r, column=1, value="Total").font = bold_font
+    ws.cell(row=r, column=1).fill = date_total_fill
+    ws.cell(row=r, column=2, value="")
+    ws.cell(row=r, column=2).fill = date_total_fill
+    col = 3
+    for g in groups:
+        m = _agg_metrics_full(g["rows"])
+        for key in metric_keys:
+            write_metric(ws.cell(row=r, column=col), m.get(key), key)
+            ws.cell(row=r, column=col).fill = date_total_fill
+            ws.cell(row=r, column=col).font = bold_font
+            col += 1
+    r += 1
+
+    # 날짜 행들
+    for d in dates:
+        dow = _dow_kr(d)
+        ws.cell(row=r, column=1, value=d)
+        ws.cell(row=r, column=2, value=dow)
+        if dow in ("토", "일"):
+            ws.cell(row=r, column=1).font = weekend_red
+            ws.cell(row=r, column=2).font = weekend_red
+        col = 3
+        for g in groups:
+            date_rows = [row for row in g["rows"] if row.get("date_start") == d]
+            if date_rows:
+                m = _agg_metrics_full(date_rows)
+                for key in metric_keys:
+                    write_metric(ws.cell(row=r, column=col), m.get(key), key)
+                    col += 1
+            else:
+                col += M
+        r += 1
+
+    return r
 
 
 @app.route("/api/insights.csv")

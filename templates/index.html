@@ -859,6 +859,45 @@
       font-weight: 700;
       color: #1d4373;
     }
+    /* Targeting 드릴다운 — Creative 행 */
+    .summary-table tbody tr.row-creative td {
+      background: #f9fbfd;
+      font-size: 11.5px;
+      color: #555;
+    }
+    .summary-table tbody tr.row-creative td.col-creative {
+      padding-left: 24px;
+      max-width: 280px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .summary-table tbody tr.subtotal-targeting td {
+      background: #e8f1fd;
+      font-weight: 700;
+      color: #2c5aa0;
+      font-size: 11.5px;
+    }
+    .summary-table tbody tr.data-row .targeting-caret {
+      display: inline-block;
+      font-size: 9px;
+      color: var(--muted);
+      transition: transform 0.15s;
+      cursor: pointer;
+      margin-right: 4px;
+      user-select: none;
+      width: 10px;
+    }
+    .summary-table tbody tr.data-row .targeting-caret.open { transform: rotate(90deg); }
+    .summary-table tbody tr.data-row td.col-targeting.expandable { cursor: pointer; }
+    .summary-table tbody tr.data-row td.col-targeting.expandable:hover { background: #eef3f8; }
+    .summary-table .creative-count {
+      display: inline-block;
+      font-size: 10px;
+      color: var(--muted);
+      font-weight: 500;
+      margin-left: 6px;
+    }
     .summary-table tbody tr.total-row td {
       background: #5b6c7e;
       color: white;
@@ -1303,17 +1342,23 @@
       return "기타";
     }
 
-    function parseTargeting(campaignName, adsetName) {
+    function parseTargetingMain(campaignName, adsetName) {
+      // 메인 tag만 (수정자 제외) — Creative 추출에 사용
       const src = ((adsetName || "") + " " + (campaignName || "")).toLowerCase();
-      let main = null;
-      if (/\ba\+|aplus/.test(src)) main = "A+";
-      else if (/\blal/.test(src)) main = "LAL";
-      else if (/prospect|\bpt\b/.test(src)) main = "PT";
-      else if (/ilsan/.test(src)) main = "Ilsan";
+      if (/\ba\+|aplus/.test(src)) return "A+";
+      if (/\blal/.test(src)) return "LAL";
+      if (/prospect|\bpt\b/.test(src)) return "PT";
+      if (/ilsan/.test(src)) return "Ilsan";
+      return null;
+    }
+
+    function parseTargeting(campaignName, adsetName) {
+      const main = parseTargetingMain(campaignName, adsetName);
       if (!main) {
         const last = (adsetName || "").split("-").pop() || "기타";
         return last;
       }
+      const src = ((adsetName || "") + " " + (campaignName || "")).toLowerCase();
       const mods = [];
       if (/primary/.test(src)) mods.push("Primary");
       if (/summer/.test(src)) mods.push("summer");
@@ -1322,10 +1367,35 @@
       return mods.length ? `${main} - ${mods.join(", ")}` : main;
     }
 
+    function parseCreative(adName, mainTag) {
+      // ad_name에서 메인 Targeting tag 뒤 부분만 짧은 라벨로 추출
+      if (!adName) return "";
+      if (!mainTag) {
+        const last = adName.split("-").pop();
+        return last || adName;
+      }
+      // case-insensitive 검색: A+의 "+"는 정규식 메타문자라서 escape
+      const escTag = mainTag.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const re = new RegExp(escTag, "i");
+      const m = adName.match(re);
+      if (!m) {
+        const last = adName.split("-").pop();
+        return last || adName;
+      }
+      const idx = m.index + m[0].length;
+      let after = adName.substring(idx);
+      // 앞쪽 - 또는 _ 제거
+      after = after.replace(/^[-_]+/, "");
+      return after || adName;
+    }
+
     function annotateRows(rows) {
       for (const r of rows) {
         r._target = parseTarget(r.campaign_name);
+        const mainTag = parseTargetingMain(r.campaign_name, r.adset_name);
+        r._targetingMain = mainTag || "기타";
         r._targeting = parseTargeting(r.campaign_name, r.adset_name);
+        r._creative = parseCreative(r.ad_name, mainTag) || r.ad_name || "";
       }
       return rows;
     }
@@ -1521,11 +1591,16 @@
       return `<td>${display}</td>`;
     }
 
-    function buildSummaryRowHtml(targetLabel, targetingLabel, metrics, rowCls) {
+    // SUMMARY 드릴다운 펼침 상태 — 키: `${target}|||${targeting}`
+    const summaryExpanded = new Set();
+
+    function buildSummaryRowHtml(targetLabel, targetingHtml, creativeHtml, metrics, rowCls, extraTitle) {
       const tdTarget = `<td class="col-target">${escHtml(targetLabel)}</td>`;
-      const tdTargeting = `<td class="col-targeting">${escHtml(targetingLabel)}</td>`;
+      const titleAttr = extraTitle ? ` title="${escHtml(extraTitle)}"` : "";
+      const tdTargeting = `<td class="col-targeting">${targetingHtml}</td>`;
+      const tdCreative = `<td class="col-creative"${titleAttr}>${creativeHtml}</td>`;
       const tdMetrics = SUMMARY_METRIC_COLS.map(([_, key, type]) => fmtMetricCell(metrics[key], type)).join("");
-      return `<tr class="${rowCls}">${tdTarget}${tdTargeting}${tdMetrics}</tr>`;
+      return `<tr class="${rowCls}">${tdTarget}${tdTargeting}${tdCreative}${tdMetrics}</tr>`;
     }
 
     function renderSummaryTable() {
@@ -1534,7 +1609,7 @@
       const thead = tbl.querySelector("thead");
       const tbody = tbl.querySelector("tbody");
 
-      const headers = ["Target", "Targeting", ...SUMMARY_METRIC_COLS.map(c => c[0])];
+      const headers = ["Target", "Targeting", "Creative", ...SUMMARY_METRIC_COLS.map(c => c[0])];
       thead.innerHTML = "<tr>" + headers.map(h => `<th>${h}</th>`).join("") + "</tr>";
 
       const filtered = applySummaryFilters();
@@ -1545,15 +1620,19 @@
         return;
       }
 
-      // Target → Targeting → rows
+      // Target → Targeting → Creative
       const grouped = {};
       for (const r of filtered) {
         const t = r._target || "기타";
         const tg = r._targeting || "기타";
+        const cr = r._creative || (r.ad_name || "");
         if (!grouped[t]) grouped[t] = {};
-        if (!grouped[t][tg]) grouped[t][tg] = [];
-        grouped[t][tg].push(r);
+        if (!grouped[t][tg]) grouped[t][tg] = { rows: [], creatives: {} };
+        grouped[t][tg].rows.push(r);
+        if (!grouped[t][tg].creatives[cr]) grouped[t][tg].creatives[cr] = { rows: [], full: r.ad_name || cr };
+        grouped[t][tg].creatives[cr].rows.push(r);
       }
+
       const targetOrder = ["Adults", "Young Learners", "Kinder"];
       const sortedTargets = Object.keys(grouped).sort((a, b) => {
         const ia = targetOrder.indexOf(a); const ib = targetOrder.indexOf(b);
@@ -1569,18 +1648,69 @@
         const targetingKeys = Object.keys(targetingMap).sort();
         let firstRow = true;
         for (const tg of targetingKeys) {
-          const m = aggregateMetrics(targetingMap[tg]);
-          out.push(buildSummaryRowHtml(firstRow ? target : "", tg, m, "data-row"));
+          const entry = targetingMap[tg];
+          const m = aggregateMetrics(entry.rows);
+          const creativeKeys = Object.keys(entry.creatives);
+          const hasMultiple = creativeKeys.length >= 1;  // 캐럿 표시 조건 (1개여도 펼침 가능)
+          const expKey = `${target}|||${tg}`;
+          const isOpen = summaryExpanded.has(expKey);
+          const caret = hasMultiple
+            ? `<span class="targeting-caret ${isOpen ? "open" : ""}">▶</span>`
+            : "";
+          const targetingHtml = `${caret}${escHtml(tg)}<span class="creative-count">${creativeKeys.length}개</span>`;
+          // 클래스에 expandable + 데이터 속성 부여
+          const rowExtra = hasMultiple ? ` data-target="${escHtml(target)}" data-targeting="${escHtml(tg)}" data-expandable="1"` : "";
+          // buildSummaryRowHtml 직접 호출 대신 인라인 (data-* 속성 부여 필요)
+          const tdTarget = `<td class="col-target">${escHtml(firstRow ? target : "")}</td>`;
+          const tdTargeting = `<td class="col-targeting ${hasMultiple ? "expandable" : ""}">${targetingHtml}</td>`;
+          const tdCreative = `<td class="col-creative"></td>`;
+          const tdMetrics = SUMMARY_METRIC_COLS.map(([_, key, type]) => fmtMetricCell(m[key], type)).join("");
+          out.push(`<tr class="data-row"${rowExtra}>${tdTarget}${tdTargeting}${tdCreative}${tdMetrics}</tr>`);
           firstRow = false;
+
+          if (isOpen) {
+            // Creative 행들 (지출 큰 순)
+            const creativeList = creativeKeys
+              .map(crName => ({
+                short: crName,
+                full: entry.creatives[crName].full,
+                metrics: aggregateMetrics(entry.creatives[crName].rows),
+              }))
+              .sort((a, b) => (b.metrics.spend || 0) - (a.metrics.spend || 0));
+            for (const cr of creativeList) {
+              out.push(buildSummaryRowHtml("", "", escHtml(cr.short), cr.metrics, "row-creative", cr.full));
+            }
+            // Targeting Sub Total
+            out.push(buildSummaryRowHtml("", "", `Sub Total (${escHtml(tg)})`, m, "subtotal-targeting"));
+          }
         }
-        const subRows = Object.values(targetingMap).flat();
+        const subRows = Object.values(targetingMap).flatMap(e => e.rows);
         const subM = aggregateMetrics(subRows);
-        out.push(buildSummaryRowHtml("", "Sub Total", subM, "subtotal-row"));
+        out.push(buildSummaryRowHtml("", "Sub Total", "", subM, "subtotal-row"));
       }
       const totalM = aggregateMetrics(filtered);
-      out.push(buildSummaryRowHtml("Total", "", totalM, "total-row"));
+      out.push(buildSummaryRowHtml("Total", "", "", totalM, "total-row"));
 
       tbody.innerHTML = out.join("");
+      attachSummaryDrilldownEvents();
+    }
+
+    function attachSummaryDrilldownEvents() {
+      const tbl = $("summaryTable");
+      if (!tbl) return;
+      tbl.querySelectorAll('tr.data-row[data-expandable="1"]').forEach(tr => {
+        const tdTargeting = tr.querySelector("td.col-targeting");
+        if (!tdTargeting) return;
+        tdTargeting.addEventListener("click", () => {
+          const t = tr.dataset.target;
+          const tg = tr.dataset.targeting;
+          if (!t || !tg) return;
+          const key = `${t}|||${tg}`;
+          if (summaryExpanded.has(key)) summaryExpanded.delete(key);
+          else summaryExpanded.add(key);
+          renderSummaryTable();
+        });
+      });
     }
 
     // 필터 변경 시 모든 영역 재렌더 (Summary + 상세 표 + 차트 + 인사이트 카드)
@@ -1852,8 +1982,8 @@
       `;
     }
 
-    // ===== 📅 일자별 상세 (wide format: Date × Target/Targeting) =====
-    let dailyState = { context: "all" };
+    // ===== 📅 일자별 상세 (wide format: Date × Target/Targeting/Creative) =====
+    let dailyState = { context: "all", subContext: null };
 
     const DAILY_METRIC_COLS = [
       ["IMPs", "impressions", "number"],
@@ -2029,7 +2159,18 @@
       return [...set].sort();
     }
 
-    function buildDailyColumnGroups(rows, context) {
+    function getCreativesForTargetTargeting(rows, target, targeting) {
+      const set = new Map();  // shortLabel → fullAdName
+      for (const r of rows) {
+        if (r._target !== target) continue;
+        if (r._targeting !== targeting) continue;
+        const sh = r._creative || (r.ad_name || "(이름 없음)");
+        if (!set.has(sh)) set.set(sh, r.ad_name || sh);
+      }
+      return [...set.entries()].sort(([a], [b]) => a.localeCompare(b));
+    }
+
+    function buildDailyColumnGroups(rows, context, subContext) {
       if (context === "all") {
         const groups = [{ label: "Total", filter: () => true }];
         for (const t of getAllTargets(rows)) {
@@ -2038,6 +2179,23 @@
         return groups;
       }
       const target = context;
+      // 서브 컨텍스트 (Targeting) 선택된 경우: [Targeting Total + Creative들]
+      if (subContext) {
+        const groups = [{
+          label: `${target} > ${subContext}`,
+          filter: r => r._target === target && r._targeting === subContext,
+        }];
+        const creatives = getCreativesForTargetTargeting(rows, target, subContext);
+        for (const [shortLabel, full] of creatives) {
+          groups.push({
+            label: shortLabel,
+            fullLabel: full,
+            filter: r => r._target === target && r._targeting === subContext && (r._creative || r.ad_name) === shortLabel,
+          });
+        }
+        return groups;
+      }
+      // 서브 컨텍스트 없음: [Target Total + 각 Targeting]
       const targetings = getTargetingsForTarget(rows, target);
       const groups = [{ label: target, filter: r => r._target === target }];
       for (const tg of targetings) {
@@ -2054,10 +2212,33 @@
         `<button type="button" data-ctx="all" class="${dailyState.context === "all" ? "active" : ""}">전체</button>`,
         ...targets.map(t => `<button type="button" data-ctx="${escHtml(t)}" class="${dailyState.context === t ? "active" : ""}">${escHtml(t)}</button>`),
       ].join("");
-      bar.innerHTML = '<span class="label">컨텍스트:</span>' + buttons;
-      bar.querySelectorAll("button").forEach(btn => {
+      // 메인 바
+      let html = '<span class="label">컨텍스트:</span>' + buttons;
+
+      // 서브 바 (Target 선택 시 + Targeting 옵션 ≥ 1개)
+      if (dailyState.context !== "all") {
+        const targetings = getTargetingsForTarget(rows, dailyState.context);
+        if (targetings.length > 0) {
+          const subBtns = [
+            `<button type="button" data-subctx="" class="${!dailyState.subContext ? "active" : ""}">${escHtml(dailyState.context)} 전체</button>`,
+            ...targetings.map(tg => `<button type="button" data-subctx="${escHtml(tg)}" class="${dailyState.subContext === tg ? "active" : ""}">${escHtml(tg)}</button>`),
+          ].join("");
+          html += `<div style="flex-basis:100%;height:0"></div><span class="label">↳ Targeting:</span>` + subBtns;
+        }
+      }
+      bar.innerHTML = html;
+
+      bar.querySelectorAll("button[data-ctx]").forEach(btn => {
         btn.addEventListener("click", () => {
           dailyState.context = btn.dataset.ctx;
+          dailyState.subContext = null;  // Target 변경 시 서브 reset
+          renderDailyTable();
+        });
+      });
+      bar.querySelectorAll("button[data-subctx]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const val = btn.dataset.subctx;
+          dailyState.subContext = val ? val : null;
           renderDailyTable();
         });
       });
@@ -2090,11 +2271,17 @@
       const availableTargets = getAllTargets(adLevelRows);
       if (dailyState.context !== "all" && !availableTargets.includes(dailyState.context)) {
         dailyState.context = "all";
+        dailyState.subContext = null;
+      }
+      // 서브 컨텍스트도 검증: 현재 Target에서 존재하는 Targeting인지
+      if (dailyState.subContext) {
+        const targetingsAvail = getTargetingsForTarget(adLevelRows, dailyState.context);
+        if (!targetingsAvail.includes(dailyState.subContext)) dailyState.subContext = null;
       }
       renderDailyContextBar(adLevelRows);
 
       const dates = getDailyDates(adLevelRows);
-      const groups = buildDailyColumnGroups(adLevelRows, dailyState.context);
+      const groups = buildDailyColumnGroups(adLevelRows, dailyState.context, dailyState.subContext);
       const M = DAILY_METRIC_COLS.length;
 
       // Header (2 rows)
@@ -2103,7 +2290,8 @@
       head += '<th class="col-dow group-end" rowspan="2">요일</th>';
       groups.forEach((g, i) => {
         const endCls = (i === groups.length - 1) ? "" : " group-end";
-        head += `<th colspan="${M}" class="${endCls.trim()}">${escHtml(g.label)}</th>`;
+        const titleAttr = g.fullLabel ? ` title="${escHtml(g.fullLabel)}"` : "";
+        head += `<th colspan="${M}" class="${endCls.trim()}"${titleAttr}>${escHtml(g.label)}</th>`;
       });
       head += '</tr><tr class="metric-header">';
       groups.forEach((g, gi) => {
