@@ -538,6 +538,64 @@ def api_weekly_insights():
     })
 
 
+@app.route("/api/comparison")
+def api_comparison():
+    """두 사용자 정의 기간 간 비교 데이터.
+
+    Query params:
+      account_id (필수)
+      current_start, current_end (필수, YYYY-MM-DD)
+      previous_start, previous_end (필수, YYYY-MM-DD)
+
+    응답:
+      {
+        current: { period, rows: [광고 단위 일별 행, _enrich_row 적용됨] },
+        previous: { period, rows: [...] }
+      }
+    필터링/집계는 클라이언트가 처리.
+    """
+    if not META_ACCESS_TOKEN or not ACCOUNT_IDS:
+        return jsonify({"error": "자격 증명 미설정"}), 400
+    resolved = _resolve_account_id(request.args.get("account_id"))
+    if not resolved:
+        return jsonify({"error": "허용되지 않은 광고 계정 ID입니다."}), 400
+
+    cs = request.args.get("current_start")
+    ce = request.args.get("current_end")
+    ps = request.args.get("previous_start")
+    pe = request.args.get("previous_end")
+    if not all([cs, ce, ps, pe]):
+        return jsonify({
+            "error": "current_start, current_end, previous_start, previous_end 모두 필요합니다."
+        }), 400
+
+    cur_res = fetch_insights(since=cs, until=ce, level="ad", account_id=resolved)
+    if "error" in cur_res:
+        return jsonify(cur_res), 400
+    prev_res = fetch_insights(since=ps, until=pe, level="ad", account_id=resolved)
+    if "error" in prev_res:
+        return jsonify(prev_res), 400
+
+    def _days(s, e):
+        try:
+            d1 = datetime.strptime(s, "%Y-%m-%d").date()
+            d2 = datetime.strptime(e, "%Y-%m-%d").date()
+            return (d2 - d1).days + 1
+        except (ValueError, TypeError):
+            return None
+
+    return jsonify({
+        "current": {
+            "period": {"start": cs, "end": ce, "days": _days(cs, ce)},
+            "rows": cur_res["data"],
+        },
+        "previous": {
+            "period": {"start": ps, "end": pe, "days": _days(ps, pe)},
+            "rows": prev_res["data"],
+        },
+    })
+
+
 @app.route("/api/insights")
 def api_insights():
     result = fetch_insights(

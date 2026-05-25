@@ -166,9 +166,137 @@
       color: var(--muted);
     }
 
-    .chart-wrap {
-      position: relative;
-      height: 320px;
+    /* 📅 일자별 상세 (wide format: Date × Target/Targeting) */
+    .daily-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .daily-context-bar {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .daily-context-bar .label {
+      font-size: 12px;
+      color: var(--muted);
+      margin-right: 6px;
+    }
+    .daily-context-bar button {
+      padding: 5px 12px;
+      border: 1px solid var(--border);
+      background: white;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .daily-context-bar button:hover { background: #f0f2f5; }
+    .daily-context-bar button.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+    .daily-wide-wrap {
+      overflow-x: auto;
+      max-height: 640px;
+      overflow-y: auto;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+    }
+    table.daily-wide-table {
+      width: max-content;
+      min-width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+    }
+    .daily-wide-table th, .daily-wide-table td {
+      padding: 4px 8px;
+      border-right: 1px solid #e8ecef;
+      border-bottom: 1px solid #e8ecef;
+      white-space: nowrap;
+    }
+    .daily-wide-table thead tr.group-header th {
+      background: #5b6c7e;
+      color: white;
+      font-weight: 700;
+      font-size: 11px;
+      text-align: center;
+      letter-spacing: 0.02em;
+      border-right: 1px solid #455261;
+      position: sticky;
+      top: 0;
+      z-index: 3;
+    }
+    .daily-wide-table thead tr.metric-header th {
+      background: #7a8a9c;
+      color: white;
+      font-weight: 600;
+      font-size: 10px;
+      text-align: center;
+      letter-spacing: 0.02em;
+      border-right: 1px solid #5b6c7e;
+      position: sticky;
+      top: 22px;
+      z-index: 3;
+    }
+    .daily-wide-table tbody td {
+      text-align: right;
+    }
+    .daily-wide-table td.col-date,
+    .daily-wide-table td.col-dow {
+      text-align: left;
+      background: #fafbfc;
+      font-weight: 500;
+      position: sticky;
+      left: 0;
+      z-index: 2;
+    }
+    .daily-wide-table td.col-dow {
+      left: 80px;
+      border-right: 2px solid var(--border);
+    }
+    .daily-wide-table thead th.col-date,
+    .daily-wide-table thead th.col-dow {
+      position: sticky;
+      z-index: 4;
+    }
+    .daily-wide-table thead th.col-date { left: 0; }
+    .daily-wide-table thead th.col-dow { left: 80px; border-right: 2px solid #455261; }
+    .daily-wide-table tbody tr.total-row td {
+      background: #fff3a8 !important;
+      font-weight: 700;
+      color: #5a4500;
+      border-bottom: 2px solid #d4b800;
+    }
+    .daily-wide-table tbody tr.total-row td.col-date,
+    .daily-wide-table tbody tr.total-row td.col-dow {
+      z-index: 2;
+    }
+    .daily-wide-table tbody tr.weekend td.col-date,
+    .daily-wide-table tbody tr.weekend td.col-dow {
+      color: #c0392b;
+    }
+    .daily-wide-table tbody tr:hover td:not(.col-date):not(.col-dow) {
+      background: #f7f9fc;
+    }
+    .daily-wide-table td.metric-none {
+      background:
+        repeating-linear-gradient(45deg,
+          transparent, transparent 4px,
+          rgba(0,0,0,0.07) 4px, rgba(0,0,0,0.07) 5px),
+        #f5f5f5;
+    }
+    .daily-wide-table td.group-end {
+      border-right: 2px solid var(--border);
+    }
+    .daily-wide-table th.group-end {
+      border-right: 2px solid #455261;
     }
 
     /* 주간 인사이트 카드 */
@@ -247,6 +375,238 @@
       background: #fde8e8;
       border-radius: 6px;
       border: 1px solid #f5b8b8;
+    }
+
+    /* 인사이트 비교 - 탭 + 기간 컨트롤 */
+    .insight-tabs {
+      display: flex;
+      gap: 4px;
+    }
+    .insight-tabs button {
+      padding: 5px 14px;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .insight-tabs button:hover { background: #f0f2f5; }
+    .insight-tabs button.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+    .insight-period-controls {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 14px;
+      align-items: center;
+    }
+    .period-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .period-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      min-width: 60px;
+    }
+    .period-days {
+      font-size: 11px;
+      color: var(--muted);
+      margin-left: 4px;
+    }
+    .period-actions {
+      display: flex;
+      gap: 6px;
+      margin-left: auto;
+    }
+    .period-actions button { font-size: 12px; padding: 5px 12px; }
+
+    /* 비교 테이블 */
+    .comparison-totals {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .comparison-totals .insight-metric {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+    }
+    .comparison-totals .insight-metric .label {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .comparison-totals .insight-metric .value {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+    .comparison-totals .insight-metric .prev {
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+    .comparison-totals .insight-metric .delta {
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .comparison-section-title {
+      font-size: 13px;
+      font-weight: 700;
+      margin: 0 0 8px 0;
+      color: var(--text);
+    }
+    .comparison-filter-note {
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 8px;
+      padding: 6px 10px;
+      background: #fff8e1;
+      border: 1px solid #ffe082;
+      border-radius: 4px;
+      display: none;
+    }
+    .comparison-filter-note.show { display: block; }
+    .campaign-comparison-wrap {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow-x: auto;
+      margin-bottom: 12px;
+    }
+    table.campaign-comparison {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    .campaign-comparison th {
+      background: #f7f9fc;
+      padding: 8px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      text-align: right;
+      border-bottom: 2px solid var(--border);
+      white-space: nowrap;
+    }
+    .campaign-comparison th:first-child { text-align: left; }
+    .campaign-comparison td {
+      padding: 8px 10px;
+      text-align: right;
+      border-bottom: 1px solid #f0f2f5;
+      vertical-align: top;
+      white-space: nowrap;
+    }
+    .campaign-comparison td:first-child {
+      text-align: left;
+      max-width: 280px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-weight: 500;
+    }
+    .campaign-comparison .cur-value { font-weight: 700; color: var(--text); }
+    .campaign-comparison .prev-value { font-size: 11px; color: var(--muted); margin-top: 1px; }
+    .campaign-comparison .delta-line { font-size: 11px; margin-top: 2px; font-weight: 600; }
+    .campaign-comparison tr.totals-row td {
+      background: #fff3a8;
+      font-weight: 700;
+      color: #5a4500;
+      border-bottom: 2px solid #d4b800;
+    }
+    .campaign-comparison tr.totals-row .cur-value { color: #5a4500; }
+    .campaign-comparison tr.totals-row .prev-value { color: #806300; }
+    /* 계층 드릴다운 */
+    .campaign-comparison tr.row-campaign td:first-child { cursor: pointer; }
+    .campaign-comparison tr.row-adset { background: #f7faff; }
+    .campaign-comparison tr.row-adset td:first-child {
+      padding-left: 28px;
+      cursor: pointer;
+      color: #444;
+      font-weight: 500;
+    }
+    .campaign-comparison tr.row-ad td { background: #fafbfc; font-size: 11.5px; }
+    .campaign-comparison tr.row-ad td:first-child {
+      padding-left: 52px;
+      color: #666;
+      font-weight: normal;
+    }
+    .campaign-comparison .caret-toggle {
+      display: inline-block;
+      width: 14px;
+      margin-right: 4px;
+      font-size: 10px;
+      color: var(--muted);
+      transition: transform 0.15s;
+      user-select: none;
+    }
+    .campaign-comparison .caret-toggle.open { transform: rotate(90deg); }
+    .campaign-comparison .no-caret { display: inline-block; width: 14px; margin-right: 4px; }
+    .campaign-comparison .child-count {
+      display: inline-block;
+      font-size: 10px;
+      color: var(--muted);
+      font-weight: 500;
+      margin-left: 6px;
+    }
+    /* 자동 인사이트 강조 */
+    .insight-bullets li .mover-line { display: inline-block; padding: 2px 0; }
+    .insight-bullets .mover-up { color: #237a14; font-weight: 600; }
+    .insight-bullets .mover-down { color: #c0392b; font-weight: 600; }
+    .insight-bullets li.section-head { list-style: none; margin-left: -18px; margin-top: 6px; font-weight: 700; }
+    .insight-bullets li.section-head:first-child { margin-top: 0; }
+    /* KPI 선택자 — 자동 인사이트의 메인 분석 축 */
+    .kpi-selector {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      margin: 14px 0 8px 0;
+      padding: 8px 12px;
+      background: #fff8e1;
+      border: 1px solid #ffe082;
+      border-radius: 6px;
+      flex-wrap: wrap;
+    }
+    .kpi-selector .label {
+      font-size: 12px;
+      font-weight: 700;
+      color: #6a5b1a;
+      margin-right: 4px;
+    }
+    .kpi-selector button {
+      padding: 5px 14px;
+      border: 1px solid var(--border);
+      background: white;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .kpi-selector button:hover { background: #f0f2f5; }
+    .kpi-selector button.active {
+      background: #f57c00;
+      color: white;
+      border-color: #f57c00;
+    }
+    /* 합계 카드 강조 (선택된 KPI 카드) */
+    .comparison-totals .insight-metric.kpi-focus {
+      border: 2px solid #f57c00;
+      box-shadow: 0 0 0 2px rgba(245, 124, 0, 0.15);
     }
 
     /* 계정 선택 카드 */
@@ -724,13 +1084,35 @@
 
     <div id="insightCard" class="card insight-card">
       <div class="insight-header">
-        <h2 class="insight-title">📊 주간 인사이트</h2>
-        <span id="insightPeriod" class="insight-period">불러오는 중...</span>
+        <h2 class="insight-title">📊 인사이트 비교</h2>
+        <div class="insight-tabs">
+          <button type="button" data-mode="weekly" class="active">📅 주간</button>
+          <button type="button" data-mode="monthly">📈 월간</button>
+        </div>
       </div>
-      <div id="insightMetrics" class="insight-metrics"></div>
-      <ul id="insightBullets" class="insight-bullets"></ul>
-      <div id="insightLoading" class="insight-loading">이번 주 데이터 분석 중...</div>
+      <div class="insight-period-controls">
+        <div class="period-row">
+          <span class="period-label">이번 기간</span>
+          <input type="date" id="curPeriodStart" />
+          <span>~</span>
+          <input type="date" id="curPeriodEnd" />
+          <span class="period-days" id="curPeriodDays"></span>
+        </div>
+        <div class="period-row">
+          <span class="period-label">비교 기간</span>
+          <input type="date" id="prevPeriodStart" />
+          <span>~</span>
+          <input type="date" id="prevPeriodEnd" />
+          <span class="period-days" id="prevPeriodDays"></span>
+        </div>
+        <div class="period-actions">
+          <button type="button" id="insightApply" class="primary">조회</button>
+          <button type="button" id="insightReset" class="secondary">기본값으로</button>
+        </div>
+      </div>
+      <div id="insightLoading" class="insight-loading">데이터 분석 중...</div>
       <div id="insightError" class="insight-error" style="display:none"></div>
+      <div id="insightContent"></div>
     </div>
     {% endif %}
 
@@ -756,15 +1138,8 @@
           <input type="date" id="until" />
         </div>
 
-        <div class="field">
-          <label for="level">리포트 수준</label>
-          <select id="level">
-            <option value="account">계정 전체</option>
-            <option value="campaign" selected>캠페인별</option>
-            <option value="adset">광고세트별</option>
-            <option value="ad">광고별</option>
-          </select>
-        </div>
+        <!-- 레벨 드롭다운 제거됨: 항상 광고 단위 일별 데이터를 가져옴 (SUMMARY/일자별/필터링 모두 동작) -->
+        <select id="level" style="display:none"><option value="ad" selected></option></select>
 
         <button id="fetchBtn" class="primary">조회</button>
         <button id="csvBtn" class="secondary">CSV 다운로드</button>
@@ -776,11 +1151,6 @@
 
     <div id="summary" class="summary" style="display:none"></div>
 
-    <div id="chartCard" class="card" style="display:none">
-      <div class="chart-wrap">
-        <canvas id="chart"></canvas>
-      </div>
-    </div>
 
     <div id="summaryCard" class="card" style="display:none">
       <h2>📊 SUMMARY — Target × Targeting</h2>
@@ -788,6 +1158,23 @@
       <div id="summaryFilterStatus" style="font-size:12px;color:var(--muted);margin-bottom:8px;display:none"></div>
       <div class="table-wrap">
         <table class="summary-table" id="summaryTable">
+          <thead></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="dailyCard" class="card" style="display:none">
+      <div class="daily-header-row">
+        <h2 style="font-size:16px;font-weight:700;margin:0">📅 일자별 상세 — Target × Targeting</h2>
+        <div class="daily-context-bar" id="dailyContextBar">
+          <span class="label">컨텍스트:</span>
+          <!-- 동적으로 채워짐 -->
+        </div>
+      </div>
+      <div id="dailyHint" style="font-size:12px;color:var(--muted);margin-bottom:10px;display:none"></div>
+      <div class="daily-wide-wrap">
+        <table class="daily-wide-table" id="dailyWideTable">
           <thead></thead>
           <tbody></tbody>
         </table>
@@ -823,7 +1210,6 @@
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script>
     const $ = (id) => document.getElementById(id);
     const datePresetEl = $("datePreset");
@@ -835,12 +1221,10 @@
     const csvBtn = $("csvBtn");
     const statusEl = $("status");
     const summaryEl = $("summary");
-    const chartCard = $("chartCard");
     const tableCard = $("tableCard");
     const emptyCard = $("emptyCard");
     const tableEl = $("resultTable");
 
-    let chartInstance = null;
 
     datePresetEl.addEventListener("change", () => {
       customRangeEl.classList.toggle("show", datePresetEl.value === "custom");
@@ -1214,7 +1598,9 @@
       renderSummaryTable();
       renderTableHeader(filtered, tableState.level);
       renderTableBody(filtered, tableState.level);
-      renderChart(filtered, tableState.level);
+      renderDailyTable();
+      // 인사이트 비교도 필터 반영 (이미 받아온 데이터로 재집계만)
+      if (typeof refreshComparisonFromFilters === "function") refreshComparisonFromFilters();
     }
 
     // ===== 테이블 상태 + 필터 =====
@@ -1432,7 +1818,6 @@
       const filtered = applyFilters();
       renderSummary(filtered);
       renderTableBody(filtered, tableState.level);
-      renderChart(filtered, tableState.level);
       updateFilterToggleLabels();
       updateFilterSummary(tableState.allRows.length, filtered.length);
     }
@@ -1467,55 +1852,316 @@
       `;
     }
 
-    function renderChart(rows, level) {
-      // ad 레벨은 일자별 분해라 같은 ad가 여러 날짜에 걸쳐 있음 → 광고별 합산 후 top 10
-      let aggregated = rows;
-      if (level === "ad") {
-        const byAd = {};
-        for (const r of rows) {
-          const k = r.ad_name || "(이름 없음)";
-          if (!byAd[k]) byAd[k] = { ad_name: k, spend: 0 };
-          byAd[k].spend += Number(r.spend) || 0;
+    // ===== 📅 일자별 상세 (wide format: Date × Target/Targeting) =====
+    let dailyState = { context: "all" };
+
+    const DAILY_METRIC_COLS = [
+      ["IMPs", "impressions", "number"],
+      ["Click", "clicks", "number"],
+      ["CTR", "ctr", "percent"],
+      ["View", "video_views", "number_nullable"],
+      ["VTR", "vtr", "percent_nullable"],
+      ["Conversion", "conversions", "number"],
+      ["CVR", "cvr", "percent"],
+      ["Spend", "spend", "currency"],
+    ];
+    const DOW_KR = ["일", "월", "화", "수", "목", "금", "토"];
+    function dayOfWeekKR(dateStr) {
+      const parts = (dateStr || "").split("-");
+      if (parts.length !== 3) return "";
+      const d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+      return DOW_KR[d.getDay()];
+    }
+
+    function fmtDailyCell(val, type, extraCls) {
+      const clsStr = extraCls ? ` class="${extraCls}"` : "";
+      if (val === null || val === undefined) {
+        if (type === "number_nullable" || type === "percent_nullable") {
+          return `<td class="metric-none${extraCls ? " " + extraCls : ""}"></td>`;
         }
-        aggregated = Object.values(byAd);
+        return `<td${clsStr}>-</td>`;
       }
-      const labelKey = level === "ad" ? "ad_name"
-                     : level === "adset" ? "adset_name"
-                     : level === "account" ? "account_id"
-                     : "campaign_name";
+      let inner;
+      if (type === "number" || type === "number_nullable") inner = fmtNumber(val);
+      else if (type === "percent" || type === "percent_nullable") inner = fmtPercent(val);
+      else if (type === "currency") inner = fmtCurrency(val);
+      else inner = val;
+      return `<td${clsStr}>${inner}</td>`;
+    }
 
-      const top = [...aggregated]
-        .sort((a, b) => (Number(b.spend) || 0) - (Number(a.spend) || 0))
-        .slice(0, 10);
+    function _UNUSED_buildDailyByMonth(rows, level) {
+      const lvl = DAILY_LEVELS[level] || DAILY_LEVELS.campaign;
+      const entityKey = lvl.key;
+      const byMonth = {};
+      for (const r of rows) {
+        const date = r.date_start;
+        if (!date) continue;
+        const month = date.slice(0, 7);
+        const entityName = (r[entityKey] || "(이름 없음)").toString();
+        const cellKey = `${date}${entityName}`;
+        if (!byMonth[month]) byMonth[month] = { cells: {}, allRows: [] };
+        if (!byMonth[month].cells[cellKey]) byMonth[month].cells[cellKey] = { date, entityName, rows: [] };
+        byMonth[month].cells[cellKey].rows.push(r);
+        byMonth[month].allRows.push(r);
+      }
+      const result = {};
+      for (const month of Object.keys(byMonth).sort().reverse()) {
+        const data = byMonth[month];
+        const cells = Object.values(data.cells)
+          .map(c => ({ date: c.date, entityName: c.entityName, metrics: aggregateMetrics(c.rows) }))
+          .sort((a, b) => {
+            if (a.date !== b.date) return b.date.localeCompare(a.date);  // 최신 일자가 위로
+            return a.entityName.localeCompare(b.entityName);
+          });
+        result[month] = { cells, total: aggregateMetrics(data.allRows) };
+      }
+      return result;
+    }
 
-      const labels = top.map(r => r[labelKey] || "(이름 없음)");
-      const data = top.map(r => Number(r.spend) || 0);
+    function formatMonthLabel(month) {
+      const [y, m] = month.split("-");
+      return `${y}년 ${parseInt(m, 10)}월`;
+    }
 
-      const ctx = document.getElementById("chart");
-      if (chartInstance) chartInstance.destroy();
-      chartInstance = new Chart(ctx, {
-        type: "bar",
-        data: {
-          labels,
-          datasets: [{
-            label: "지출",
-            data,
-            backgroundColor: "#1877f2",
-            borderRadius: 4,
-          }],
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
-            title: { display: true, text: "지출 상위 10개", font: { size: 14 } },
-          },
-          scales: {
-            y: { beginAtZero: true, ticks: { callback: v => v.toLocaleString("ko-KR") } },
-          },
-        },
+    function _UNUSED_renderDailyTable_OLD() {
+      const card = $("dailyCard");
+      const container = $("dailyMonths");
+      const hint = $("dailyHint");
+      if (!card || !container) return;
+
+      const filtered = applySummaryFilters();
+      const adLevelRows = filtered.filter(r => r.date_start);  // ad-level daily만 사용
+
+      if (!adLevelRows.length) {
+        hint.style.display = "block";
+        hint.textContent = '선택한 기간에 광고 단위 일별 데이터가 없습니다.';
+        container.innerHTML = "";
+        return;
+      }
+      hint.style.display = "none";
+
+      const lvl = DAILY_LEVELS[dailyState.level] || DAILY_LEVELS.campaign;
+      const grouped = buildDailyByMonth(adLevelRows, dailyState.level);
+      const months = Object.keys(grouped);
+
+      if (!months.length) {
+        container.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:14px 0">데이터가 없습니다.</div>';
+        return;
+      }
+
+      // 최초 렌더링이면 모든 월을 열어둠
+      if (dailyState.openMonths.size === 0) {
+        months.forEach(m => dailyState.openMonths.add(m));
+      }
+
+      const headers = ["날짜", lvl.label, ...DAILY_METRIC_COLS.map(c => c[0])];
+      const colspan = headers.length;
+
+      container.innerHTML = months.map(month => {
+        const { cells, total } = grouped[month];
+        const isOpen = dailyState.openMonths.has(month);
+        const bodyHtml = `<table>
+          <thead><tr>${headers.map(h => `<th>${h}</th>`).join("")}</tr></thead>
+          <tbody>
+            <tr class="month-total">
+              <td colspan="2">월 합계 (${cells.length}행)</td>
+              ${DAILY_METRIC_COLS.map(([_, key, type]) => fmtDailyCell(total[key], type)).join("")}
+            </tr>
+            ${cells.map(c => `<tr>
+              <td>${c.date}</td>
+              <td title="${escHtml(c.entityName)}">${escHtml(c.entityName)}</td>
+              ${DAILY_METRIC_COLS.map(([_, key, type]) => fmtDailyCell(c.metrics[key], type)).join("")}
+            </tr>`).join("")}
+          </tbody>
+        </table>`;
+        return `<div class="daily-month" data-month="${month}">
+          <div class="daily-month-header">
+            <span class="caret ${isOpen ? "open" : ""}">▶</span>
+            <span>${formatMonthLabel(month)}</span>
+            <span class="daily-month-summary">
+              지출 <b>${fmtCurrency(total.spend)}원</b> · 노출 ${fmtNumber(total.impressions)} · 클릭 ${fmtNumber(total.clicks)} · ${cells.length}행
+            </span>
+          </div>
+          <div class="daily-month-body ${isOpen ? "open" : ""}">${bodyHtml}</div>
+        </div>`;
+      }).join("");
+
+      // 월 토글 이벤트
+      container.querySelectorAll(".daily-month").forEach(monthEl => {
+        const month = monthEl.dataset.month;
+        const header = monthEl.querySelector(".daily-month-header");
+        header.addEventListener("click", () => {
+          const body = monthEl.querySelector(".daily-month-body");
+          const caret = monthEl.querySelector(".caret");
+          const wasOpen = body.classList.contains("open");
+          body.classList.toggle("open");
+          caret.classList.toggle("open");
+          if (wasOpen) dailyState.openMonths.delete(month);
+          else dailyState.openMonths.add(month);
+        });
       });
+    }
+
+    function _UNUSED_bindDailyToggle_OLD() {
+      document.querySelectorAll("#dailyCard .daily-toggle button").forEach(btn => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll("#dailyCard .daily-toggle button").forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          dailyState.level = btn.dataset.level;
+          renderDailyTable();
+        });
+      });
+    }
+
+    // ===== 일자별 wide-format 헬퍼 =====
+    function getAllTargets(rows) {
+      const set = new Set();
+      for (const r of rows) if (r._target) set.add(r._target);
+      const order = ["Adults", "Young Learners", "Kinder"];
+      const sorted = order.filter(t => set.has(t));
+      for (const t of set) if (!order.includes(t)) sorted.push(t);
+      return sorted;
+    }
+
+    function getTargetingsForTarget(rows, target) {
+      const set = new Set();
+      for (const r of rows) if (r._target === target && r._targeting) set.add(r._targeting);
+      return [...set].sort();
+    }
+
+    function buildDailyColumnGroups(rows, context) {
+      if (context === "all") {
+        const groups = [{ label: "Total", filter: () => true }];
+        for (const t of getAllTargets(rows)) {
+          groups.push({ label: t, filter: r => r._target === t });
+        }
+        return groups;
+      }
+      const target = context;
+      const targetings = getTargetingsForTarget(rows, target);
+      const groups = [{ label: target, filter: r => r._target === target }];
+      for (const tg of targetings) {
+        groups.push({ label: tg, filter: r => r._target === target && r._targeting === tg });
+      }
+      return groups;
+    }
+
+    function renderDailyContextBar(rows) {
+      const bar = $("dailyContextBar");
+      if (!bar) return;
+      const targets = getAllTargets(rows);
+      const buttons = [
+        `<button type="button" data-ctx="all" class="${dailyState.context === "all" ? "active" : ""}">전체</button>`,
+        ...targets.map(t => `<button type="button" data-ctx="${escHtml(t)}" class="${dailyState.context === t ? "active" : ""}">${escHtml(t)}</button>`),
+      ].join("");
+      bar.innerHTML = '<span class="label">컨텍스트:</span>' + buttons;
+      bar.querySelectorAll("button").forEach(btn => {
+        btn.addEventListener("click", () => {
+          dailyState.context = btn.dataset.ctx;
+          renderDailyTable();
+        });
+      });
+    }
+
+    function getDailyDates(rows) {
+      const set = new Set();
+      for (const r of rows) if (r.date_start) set.add(r.date_start);
+      return [...set].sort();
+    }
+
+    function renderDailyTable() {
+      const card = $("dailyCard");
+      const tbl = $("dailyWideTable");
+      const hint = $("dailyHint");
+      if (!card || !tbl) return;
+
+      const filtered = applySummaryFilters();
+      const adLevelRows = filtered.filter(r => r.date_start);
+
+      if (!adLevelRows.length) {
+        hint.style.display = "block";
+        hint.textContent = '선택한 기간에 일별 데이터가 없습니다.';
+        tbl.querySelector("thead").innerHTML = "";
+        tbl.querySelector("tbody").innerHTML = "";
+        return;
+      }
+      hint.style.display = "none";
+
+      const availableTargets = getAllTargets(adLevelRows);
+      if (dailyState.context !== "all" && !availableTargets.includes(dailyState.context)) {
+        dailyState.context = "all";
+      }
+      renderDailyContextBar(adLevelRows);
+
+      const dates = getDailyDates(adLevelRows);
+      const groups = buildDailyColumnGroups(adLevelRows, dailyState.context);
+      const M = DAILY_METRIC_COLS.length;
+
+      // Header (2 rows)
+      let head = '<tr class="group-header">';
+      head += '<th class="col-date" rowspan="2">Date</th>';
+      head += '<th class="col-dow group-end" rowspan="2">요일</th>';
+      groups.forEach((g, i) => {
+        const endCls = (i === groups.length - 1) ? "" : " group-end";
+        head += `<th colspan="${M}" class="${endCls.trim()}">${escHtml(g.label)}</th>`;
+      });
+      head += '</tr><tr class="metric-header">';
+      groups.forEach((g, gi) => {
+        const isLastGroup = gi === groups.length - 1;
+        DAILY_METRIC_COLS.forEach(([label], mi) => {
+          const isLastMetric = mi === M - 1;
+          const endCls = (isLastMetric && !isLastGroup) ? "group-end" : "";
+          head += `<th class="${endCls}">${label}</th>`;
+        });
+      });
+      head += '</tr>';
+
+      // Body: Total row + date rows
+      let body = '<tr class="total-row">';
+      body += '<td class="col-date" colspan="2">Total</td>';
+      groups.forEach((g, gi) => {
+        const isLastGroup = gi === groups.length - 1;
+        const m = aggregateMetrics(adLevelRows.filter(g.filter));
+        DAILY_METRIC_COLS.forEach(([, key, type], mi) => {
+          const isLastMetric = mi === M - 1;
+          const endCls = (isLastMetric && !isLastGroup) ? "group-end" : "";
+          body += fmtDailyCell(m[key], type, endCls);
+        });
+      });
+      body += '</tr>';
+
+      for (const date of dates) {
+        const dateRows = adLevelRows.filter(r => r.date_start === date);
+        const dow = dayOfWeekKR(date);
+        const isWeekend = (dow === "토" || dow === "일");
+        const trCls = isWeekend ? "weekend" : "";
+        body += `<tr class="${trCls}">`;
+        body += `<td class="col-date">${date}</td>`;
+        body += `<td class="col-dow group-end">${dow}</td>`;
+        groups.forEach((g, gi) => {
+          const isLastGroup = gi === groups.length - 1;
+          const groupRows = dateRows.filter(g.filter);
+          const hasData = groupRows.length > 0;
+          const m = hasData ? aggregateMetrics(groupRows) : null;
+          DAILY_METRIC_COLS.forEach(([, key, type], mi) => {
+            const isLastMetric = mi === M - 1;
+            const endCls = (isLastMetric && !isLastGroup) ? "group-end" : "";
+            if (!hasData) {
+              body += `<td class="${endCls}"></td>`;
+            } else {
+              body += fmtDailyCell(m[key], type, endCls);
+            }
+          });
+        });
+        body += '</tr>';
+      }
+
+      tbl.querySelector("thead").innerHTML = head;
+      tbl.querySelector("tbody").innerHTML = body;
+    }
+
+    function bindDailyToggle() {
+      // 컨텍스트 바 버튼은 renderDailyContextBar 안에서 매번 새로 바인딩됨 (동적 옵션)
     }
 
     async function fetchInsights() {
@@ -1534,8 +2180,9 @@
         if (!res.ok || data.error) {
           setStatus("error", data.error || `요청 실패 (${res.status})`);
           summaryEl.style.display = "none";
-          chartCard.style.display = "none";
           tableCard.style.display = "none";
+          const sc1 = document.getElementById("summaryCard"); if (sc1) sc1.style.display = "none";
+          const dc1 = document.getElementById("dailyCard"); if (dc1) dc1.style.display = "none";
           breakdownCard.style.display = "none";
           return;
         }
@@ -1544,28 +2191,30 @@
         if (!rows.length) {
           setStatus("info", "선택한 기간에 데이터가 없습니다.");
           summaryEl.style.display = "none";
-          chartCard.style.display = "none";
           tableCard.style.display = "none";
+          const sc2 = document.getElementById("summaryCard"); if (sc2) sc2.style.display = "none";
+          const dc2 = document.getElementById("dailyCard"); if (dc2) dc2.style.display = "none";
           breakdownCard.style.display = "none";
           return;
         }
         annotateRows(rows);
-        // SUMMARY 상태에 raw rows 저장 (필터 가능한 ad-level이 가장 풍부하지만 다른 level도 동작)
         summaryState.allRows = rows;
         summaryState.level = levelEl.value;
         summaryState.filters = {};
+        dailyState.context = "all";  // 새 조회마다 컨텍스트는 전체로 리셋
 
         renderSummary(rows);
         renderTable(rows, levelEl.value);
-        renderChart(rows, levelEl.value);
         renderSummaryFilterBar();
         renderSummaryTable();
+        renderDailyTable();
 
         summaryEl.style.display = "grid";
-        chartCard.style.display = "block";
         tableCard.style.display = "block";
         const sc = document.getElementById("summaryCard");
         if (sc) sc.style.display = "block";
+        const dc = document.getElementById("dailyCard");
+        if (dc) dc.style.display = "block";
 
         // 타겟×에셋 분해도 함께 로드
         loadBreakdown();
@@ -1844,39 +2493,515 @@
     const xlsxBtn = $("xlsxBtn");
     if (xlsxBtn) xlsxBtn.addEventListener("click", downloadXlsx);
 
-    // ===== 주간 인사이트 =====
+    // ===== 인사이트 비교 (주간/월간 + 사용자 정의 기간) =====
     const insightCard = $("insightCard");
-    const insightPeriod = $("insightPeriod");
-    const insightMetrics = $("insightMetrics");
-    const insightBullets = $("insightBullets");
     const insightLoading = $("insightLoading");
     const insightError = $("insightError");
+    const insightContent = $("insightContent");
+    const curPeriodStart = $("curPeriodStart");
+    const curPeriodEnd = $("curPeriodEnd");
+    const prevPeriodStart = $("prevPeriodStart");
+    const prevPeriodEnd = $("prevPeriodEnd");
+    const curPeriodDays = $("curPeriodDays");
+    const prevPeriodDays = $("prevPeriodDays");
 
-    function deltaClass(pct, inverse = false) {
-      if (pct === null || pct === undefined || pct === 0) return "neutral";
-      const isUp = pct > 0;
-      return (isUp !== inverse) ? "up" : "down";
+    let comparisonState = {
+      mode: "weekly",
+      data: { current: { rows: [], period: {} }, previous: { rows: [], period: {} } },
+    };
+
+    function _fmtYmd(d) {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${y}-${m}-${day}`;
+    }
+    function _addDays(d, n) {
+      const nd = new Date(d);
+      nd.setDate(d.getDate() + n);
+      return nd;
+    }
+    function defaultWeeklyPeriods() {
+      // 가장 최근 완료된 주(Mon~Sun)와 그 전 주
+      const today = new Date();
+      const dow = today.getDay();  // Sun=0, Mon=1, ..., Sat=6
+      const daysToLastSun = dow === 0 ? 7 : dow;
+      const lastSun = _addDays(today, -daysToLastSun);
+      const lastMon = _addDays(lastSun, -6);
+      const prevSun = _addDays(lastMon, -1);
+      const prevMon = _addDays(prevSun, -6);
+      return {
+        current: { start: _fmtYmd(lastMon), end: _fmtYmd(lastSun) },
+        previous: { start: _fmtYmd(prevMon), end: _fmtYmd(prevSun) },
+      };
+    }
+    function defaultMonthlyPeriods() {
+      // 가장 최근 완료된 월과 그 전 월
+      const today = new Date();
+      const y = today.getFullYear(), m = today.getMonth();  // 0-indexed
+      const lastEnd = new Date(y, m, 0);  // 전월 마지막일
+      const lastStart = new Date(y, m - 1, 1);
+      const prevEnd = new Date(y, m - 1, 0);
+      const prevStart = new Date(y, m - 2, 1);
+      return {
+        current: { start: _fmtYmd(lastStart), end: _fmtYmd(lastEnd) },
+        previous: { start: _fmtYmd(prevStart), end: _fmtYmd(prevEnd) },
+      };
+    }
+    function getDefaultPeriods(mode) {
+      return mode === "monthly" ? defaultMonthlyPeriods() : defaultWeeklyPeriods();
+    }
+
+    function updateDayCountLabels() {
+      const calc = (s, e) => {
+        if (!s || !e) return "";
+        const d1 = new Date(s), d2 = new Date(e);
+        const ms = d2.getTime() - d1.getTime();
+        if (isNaN(ms) || ms < 0) return "";
+        return `(${Math.round(ms / 86400000) + 1}일)`;
+      };
+      curPeriodDays.textContent = calc(curPeriodStart.value, curPeriodEnd.value);
+      prevPeriodDays.textContent = calc(prevPeriodStart.value, prevPeriodEnd.value);
+    }
+
+    function applyDefaultsForMode() {
+      const p = getDefaultPeriods(comparisonState.mode);
+      curPeriodStart.value = p.current.start;
+      curPeriodEnd.value = p.current.end;
+      prevPeriodStart.value = p.previous.start;
+      prevPeriodEnd.value = p.previous.end;
+      updateDayCountLabels();
     }
 
     function fmtDelta(pct) {
       if (pct === null || pct === undefined) return "비교 불가";
+      if (!isFinite(pct)) return "신규";
       const arrow = pct > 0 ? "▲" : (pct < 0 ? "▼" : "—");
       return `${arrow} ${Math.abs(pct).toFixed(1)}%`;
     }
-
-    function renderInsightMetric(label, value, pct, opts = {}) {
-      const inverse = !!opts.lowerIsBetter;
-      const cls = deltaClass(pct, inverse);
-      return `
-        <div class="insight-metric">
-          <div class="label">${label}</div>
-          <div class="value">${value}</div>
-          <div class="delta ${cls}">${fmtDelta(pct)}</div>
-        </div>
-      `;
+    function deltaClass(pct, inverse = false) {
+      if (pct === null || pct === undefined || pct === 0 || !isFinite(pct)) return "neutral";
+      const isUp = pct > 0;
+      return (isUp !== inverse) ? "up" : "down";
+    }
+    function pctChange(now, prev) {
+      if (prev === null || prev === undefined || prev === 0) {
+        return (now > 0) ? Infinity : null;
+      }
+      return ((now - prev) / prev) * 100;
     }
 
-    async function loadWeeklyInsights() {
+    function applyFiltersToRows(rows) {
+      const filters = summaryState.filters || {};
+      const activeKeys = Object.keys(filters).filter(k => filters[k] && filters[k].size > 0);
+      if (!activeKeys.length) return rows;
+      return rows.filter(r => activeKeys.every(k => filters[k].has(r[k] || "")));
+    }
+
+    // 캠페인 → 광고세트 → 광고 드릴다운 펼침 상태 (재렌더 시 유지)
+    const comparisonExpanded = { campaigns: new Set(), adsets: new Set() };
+
+    // ===== 메인 KPI (자동 분석의 lens) =====
+    const KPI_OPTIONS = [
+      { key: "impressions", label: "노출", baseThreshold: 50 },
+      { key: "clicks",      label: "클릭", baseThreshold: 50 },
+      { key: "video_views", label: "뷰",   baseThreshold: 50 },
+      { key: "conversions", label: "전환", baseThreshold: 5 },
+    ];
+    let insightKpi = localStorage.getItem("comparisonKpi") || "conversions";
+    if (!KPI_OPTIONS.find(o => o.key === insightKpi)) insightKpi = "conversions";
+    function getKpiLabel(k) {
+      const o = KPI_OPTIONS.find(x => x.key === k);
+      return o ? o.label : k;
+    }
+    function getKpiBaseThreshold(k) {
+      const o = KPI_OPTIONS.find(x => x.key === k);
+      return o ? o.baseThreshold : 50;
+    }
+    function kpiValue(metricsObj, kpi) {
+      const v = metricsObj[kpi];
+      if (v === null || v === undefined) return 0;
+      return Number(v) || 0;
+    }
+
+    function buildComparisonHierarchy(curRows, prevRows) {
+      const tree = {};
+      const ensure = (cn, an, ad) => {
+        if (!tree[cn]) tree[cn] = { cur: [], prev: [], adsets: {} };
+        if (an !== undefined) {
+          if (!tree[cn].adsets[an]) tree[cn].adsets[an] = { cur: [], prev: [], ads: {} };
+          if (ad !== undefined) {
+            if (!tree[cn].adsets[an].ads[ad]) tree[cn].adsets[an].ads[ad] = { cur: [], prev: [] };
+          }
+        }
+      };
+      const addRow = (r, period) => {
+        const cn = r.campaign_name || "(이름 없음)";
+        const an = r.adset_name || "(이름 없음)";
+        const ad = r.ad_name || "(이름 없음)";
+        ensure(cn, an, ad);
+        tree[cn][period].push(r);
+        tree[cn].adsets[an][period].push(r);
+        tree[cn].adsets[an].ads[ad][period].push(r);
+      };
+      curRows.forEach(r => addRow(r, "cur"));
+      prevRows.forEach(r => addRow(r, "prev"));
+      return tree;
+    }
+
+    function renderComparisonContent() {
+      if (!insightContent) return;
+      const curRowsRaw = comparisonState.data.current.rows || [];
+      const prevRowsRaw = comparisonState.data.previous.rows || [];
+
+      // 필터 적용 (summaryState 필터 공유)
+      const curRows = applyFiltersToRows(curRowsRaw);
+      const prevRows = applyFiltersToRows(prevRowsRaw);
+
+      // 합계 비교
+      const curT = aggregateMetrics(curRows);
+      const prevT = aggregateMetrics(prevRows);
+
+      // 계층 빌드 (캠페인 → 광고세트 → 광고)
+      const tree = buildComparisonHierarchy(curRows, prevRows);
+
+      // 캠페인 레벨 행 데이터 (정렬용 + 인사이트용)
+      // 정렬 기준: 선택 KPI의 이번 기간 값 내림차순
+      const campaigns = Object.entries(tree).map(([name, data]) => ({
+        name,
+        cur: aggregateMetrics(data.cur),
+        prev: aggregateMetrics(data.prev),
+        adsets: data.adsets,
+      })).sort((a, b) => kpiValue(b.cur, insightKpi) - kpiValue(a.cur, insightKpi));
+
+      const curP = comparisonState.data.current.period || {};
+      const prevP = comparisonState.data.previous.period || {};
+      const modeLabel = comparisonState.mode === "monthly" ? "월간" : "주간";
+
+      const activeFilters = Object.entries(summaryState.filters || {})
+        .filter(([, s]) => s && s.size > 0);
+      const filterLabelMap = { _target: "Target", _targeting: "Targeting", campaign_name: "캠페인", adset_name: "광고세트", ad_name: "광고" };
+      const filterNoteHtml = activeFilters.length
+        ? `<div class="comparison-filter-note show">필터 적용 중: ${activeFilters.map(([k, s]) => `${filterLabelMap[k] || k} ${s.size}개`).join(" · ")}</div>`
+        : "";
+
+      // 합계 카드 (선택 KPI 카드는 kpi-focus 클래스로 강조)
+      const tile = (label, curVal, prevVal, type, opts = {}) => {
+        const inverse = !!opts.lowerIsBetter;
+        const focusKey = opts.focusKey;
+        const isFocus = focusKey && focusKey === insightKpi;
+        const pct = pctChange(curVal, prevVal);
+        const cls = deltaClass(pct, inverse);
+        const fmt = (v) => {
+          if (v === null || v === undefined) return "-";
+          if (type === "currency") return fmtCurrency(v) + "원";
+          if (type === "percent") return (v || 0).toFixed(2) + "%";
+          return fmtNumber(v);
+        };
+        return `<div class="insight-metric${isFocus ? " kpi-focus" : ""}">
+          <div class="label">${label}</div>
+          <div class="value">${fmt(curVal)}</div>
+          <div class="prev">전기간: ${fmt(prevVal)}</div>
+          <div class="delta ${cls}">${fmtDelta(pct)}</div>
+        </div>`;
+      };
+
+      const totalsHtml = `
+        <div class="comparison-totals">
+          ${tile("노출", curT.impressions, prevT.impressions, "number", { focusKey: "impressions" })}
+          ${tile("클릭", curT.clicks, prevT.clicks, "number", { focusKey: "clicks" })}
+          ${tile("뷰", curT.video_views, prevT.video_views, "number", { focusKey: "video_views" })}
+          ${tile("전환", curT.conversions, prevT.conversions, "number", { focusKey: "conversions" })}
+          ${tile("CTR", curT.ctr, prevT.ctr, "percent")}
+          ${tile("지출", curT.spend, prevT.spend, "currency")}
+        </div>`;
+
+      // 비교 행 셀
+      const cellMetric = (curV, prevV, type, opts = {}) => {
+        const inverse = !!opts.lowerIsBetter;
+        const pct = pctChange(curV, prevV);
+        const cls = deltaClass(pct, inverse);
+        const fmt = (v) => {
+          if (v === null || v === undefined) return "-";
+          if (type === "currency") return fmtCurrency(v) + "원";
+          if (type === "percent") return (v || 0).toFixed(2) + "%";
+          return fmtNumber(v);
+        };
+        return `<td>
+          <div class="cur-value">${fmt(curV)}</div>
+          <div class="prev-value">전: ${fmt(prevV)}</div>
+          <div class="delta-line ${cls}">${fmtDelta(pct)}</div>
+        </td>`;
+      };
+
+      const metricsHtml = (m) => `
+        ${cellMetric(m.cur.impressions, m.prev.impressions, "number")}
+        ${cellMetric(m.cur.clicks, m.prev.clicks, "number")}
+        ${cellMetric(m.cur.ctr, m.prev.ctr, "percent")}
+        ${cellMetric(m.cur.vtr !== null ? m.cur.vtr : 0, m.prev.vtr !== null ? m.prev.vtr : 0, "percent")}
+        ${cellMetric(m.cur.conversions, m.prev.conversions, "number")}
+        ${cellMetric(m.cur.cvr, m.prev.cvr, "percent")}
+        ${cellMetric(m.cur.spend, m.prev.spend, "currency")}
+      `;
+
+      // 행 생성 (계층)
+      const bodyRows = [];
+      // 합계 행
+      bodyRows.push(`<tr class="totals-row">
+        <td><span class="no-caret"></span>전체 합계</td>
+        ${metricsHtml({ cur: curT, prev: prevT })}
+      </tr>`);
+
+      for (const c of campaigns) {
+        const isOpen = comparisonExpanded.campaigns.has(c.name);
+        const adsetCount = Object.keys(c.adsets).length;
+        const caret = adsetCount > 0
+          ? `<span class="caret-toggle ${isOpen ? "open" : ""}">▶</span>`
+          : `<span class="no-caret"></span>`;
+        bodyRows.push(`<tr class="row-campaign" data-cname="${escHtml(c.name)}">
+          <td title="${escHtml(c.name)}">${caret}${escHtml(c.name)}<span class="child-count">${adsetCount}개 광고세트</span></td>
+          ${metricsHtml(c)}
+        </tr>`);
+
+        if (!isOpen) continue;
+
+        // 광고세트 행
+        const adsetEntries = Object.entries(c.adsets).map(([name, data]) => ({
+          name,
+          cur: aggregateMetrics(data.cur),
+          prev: aggregateMetrics(data.prev),
+          ads: data.ads,
+        })).sort((a, b) => (b.cur.spend || 0) - (a.cur.spend || 0));
+
+        for (const a of adsetEntries) {
+          const adsetKey = `${c.name}|||${a.name}`;
+          const isAOpen = comparisonExpanded.adsets.has(adsetKey);
+          const adCount = Object.keys(a.ads).length;
+          const aCaret = adCount > 0
+            ? `<span class="caret-toggle ${isAOpen ? "open" : ""}">▶</span>`
+            : `<span class="no-caret"></span>`;
+          bodyRows.push(`<tr class="row-adset" data-cname="${escHtml(c.name)}" data-aname="${escHtml(a.name)}">
+            <td title="${escHtml(a.name)}">${aCaret}${escHtml(a.name)}<span class="child-count">${adCount}개 광고</span></td>
+            ${metricsHtml(a)}
+          </tr>`);
+
+          if (!isAOpen) continue;
+
+          const adEntries = Object.entries(a.ads).map(([name, data]) => ({
+            name,
+            cur: aggregateMetrics(data.cur),
+            prev: aggregateMetrics(data.prev),
+          })).sort((x, y) => (y.cur.spend || 0) - (x.cur.spend || 0));
+
+          for (const ad of adEntries) {
+            bodyRows.push(`<tr class="row-ad">
+              <td title="${escHtml(ad.name)}"><span class="no-caret"></span>${escHtml(ad.name)}</td>
+              ${metricsHtml(ad)}
+            </tr>`);
+          }
+        }
+      }
+
+      const tableHtml = `
+        <div class="campaign-comparison-wrap">
+          <table class="campaign-comparison">
+            <thead>
+              <tr>
+                <th>캠페인 / 광고세트 / 광고</th>
+                <th>노출</th>
+                <th>클릭</th>
+                <th>CTR</th>
+                <th>VTR</th>
+                <th>전환</th>
+                <th>CVR</th>
+                <th>지출</th>
+              </tr>
+            </thead>
+            <tbody>${bodyRows.join("")}</tbody>
+          </table>
+        </div>`;
+
+      // ===== 자동 인사이트 (선택된 KPI 중심) =====
+      const kpiLabel = getKpiLabel(insightKpi);
+      const bullets = generateInsightBullets(curT, prevT, campaigns, modeLabel, insightKpi);
+      const bulletsHtml = `<ul class="insight-bullets">${bullets.map(b => `<li${b.isHead ? ' class="section-head"' : ""}>${b.html}</li>`).join("")}</ul>`;
+
+      // 헤더 정보
+      const periodInfo = `<div style="font-size:12px;color:var(--muted);margin-bottom:10px">
+        이번 기간 ${curP.start || "?"} ~ ${curP.end || "?"} (${curP.days || "?"}일) · 비교 ${prevP.start || "?"} ~ ${prevP.end || "?"} (${prevP.days || "?"}일)
+      </div>`;
+
+      // KPI 선택자 바
+      const kpiSelectorHtml = `<div class="kpi-selector">
+        <span class="label">🎯 메인 KPI:</span>
+        ${KPI_OPTIONS.map(o => `<button type="button" data-kpi="${o.key}" class="${o.key === insightKpi ? "active" : ""}">${o.label}</button>`).join("")}
+      </div>`;
+
+      insightContent.innerHTML = periodInfo + filterNoteHtml + totalsHtml +
+        `<h3 class="comparison-section-title">캠페인 × 광고세트 × 광고 비교 (클릭하면 펼침, ${escHtml(kpiLabel)} 큰 순)</h3>` + tableHtml +
+        kpiSelectorHtml +
+        `<h3 class="comparison-section-title">💡 자동 인사이트 — ${escHtml(kpiLabel)} 중심</h3>` + bulletsHtml;
+
+      attachComparisonRowEvents();
+      attachKpiSelectorEvents();
+    }
+
+    function attachKpiSelectorEvents() {
+      insightContent.querySelectorAll(".kpi-selector button").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const k = btn.dataset.kpi;
+          if (!k || k === insightKpi) return;
+          insightKpi = k;
+          localStorage.setItem("comparisonKpi", insightKpi);
+          renderComparisonContent();  // 재렌더만 (API 재호출 없음)
+        });
+      });
+    }
+
+    function attachComparisonRowEvents() {
+      // 캠페인 행 토글
+      insightContent.querySelectorAll("tr.row-campaign").forEach(tr => {
+        tr.addEventListener("click", (e) => {
+          const cname = tr.dataset.cname;
+          if (!cname) return;
+          if (comparisonExpanded.campaigns.has(cname)) {
+            comparisonExpanded.campaigns.delete(cname);
+            // 닫을 땐 하위 광고세트의 펼침 상태도 정리
+            for (const k of Array.from(comparisonExpanded.adsets)) {
+              if (k.startsWith(cname + "|||")) comparisonExpanded.adsets.delete(k);
+            }
+          } else {
+            comparisonExpanded.campaigns.add(cname);
+          }
+          renderComparisonContent();
+        });
+      });
+      // 광고세트 행 토글
+      insightContent.querySelectorAll("tr.row-adset").forEach(tr => {
+        tr.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const cname = tr.dataset.cname;
+          const aname = tr.dataset.aname;
+          if (!cname || !aname) return;
+          const key = `${cname}|||${aname}`;
+          if (comparisonExpanded.adsets.has(key)) comparisonExpanded.adsets.delete(key);
+          else comparisonExpanded.adsets.add(key);
+          renderComparisonContent();
+        });
+      });
+    }
+
+    // ===== 자동 인사이트 — 선택된 KPI 중심, 유의미한 변동만 =====
+    function generateInsightBullets(curT, prevT, campaigns, modeLabel, kpi) {
+      const bullets = [];
+      const kpiLabel = getKpiLabel(kpi);
+      const baseThreshold = getKpiBaseThreshold(kpi);
+
+      // KPI = 뷰인데 모든 데이터가 image-only인 경우 안내
+      const kpiHasData = (curT[kpi] !== null && curT[kpi] !== undefined) ||
+                        (prevT[kpi] !== null && prevT[kpi] !== undefined);
+      if (kpi === "video_views" && !kpiHasData) {
+        bullets.push({ isHead: true, html: `📌 ${modeLabel} 전체 ${kpiLabel} 변동` });
+        bullets.push({
+          isHead: false,
+          html: `<span style="color:var(--muted)">선택한 기간에 비디오 광고가 없어 뷰 데이터가 없습니다. 다른 KPI 선택을 권장합니다.</span>`,
+        });
+        return bullets;
+      }
+
+      // ===== 섹션 1: KPI 전체 변동 (메인) + 보조 메트릭 =====
+      const curV = kpiValue(curT, kpi), prevV = kpiValue(prevT, kpi);
+      const mainPct = pctChange(curV, prevV);
+      const mainCls = deltaClass(mainPct, false);
+
+      bullets.push({ isHead: true, html: `📌 ${modeLabel} 전체 ${escHtml(kpiLabel)} 변동` });
+      bullets.push({
+        isHead: false,
+        html: `<b style="font-size:14px">${escHtml(kpiLabel)} <span class="${mainCls}">${fmtNumber(curV)}</span> <span style="color:var(--muted);font-weight:normal">(전기간 ${fmtNumber(prevV)}, <span class="${mainCls}">${fmtDelta(mainPct)}</span>)</span></b>`,
+      });
+
+      // 보조 메트릭: KPI를 제외한 나머지 핵심 메트릭
+      const SECONDARY = [
+        { key: "impressions", label: "노출", type: "number" },
+        { key: "clicks",      label: "클릭", type: "number" },
+        { key: "video_views", label: "뷰",   type: "number" },
+        { key: "conversions", label: "전환", type: "number" },
+        { key: "ctr",         label: "CTR",  type: "percent" },
+        { key: "cvr",         label: "CVR",  type: "percent" },
+        { key: "spend",       label: "지출", type: "currency" },
+      ].filter(m => m.key !== kpi);
+      const secParts = [];
+      for (const m of SECONDARY) {
+        const sc = (curT[m.key] === null || curT[m.key] === undefined) ? null : Number(curT[m.key]);
+        const sp = (prevT[m.key] === null || prevT[m.key] === undefined) ? null : Number(prevT[m.key]);
+        if (sc === null && sp === null) continue;
+        const pct = pctChange(sc, sp);
+        if (pct === null) continue;
+        const cls = deltaClass(pct, false);
+        let val;
+        if (m.type === "currency") val = fmtCurrency(sc || 0) + "원";
+        else if (m.type === "percent") val = (sc || 0).toFixed(2) + "%";
+        else val = fmtNumber(sc || 0);
+        secParts.push(`${m.label} ${val} <span class="${cls}">${fmtDelta(pct)}</span>`);
+      }
+      if (secParts.length) {
+        bullets.push({
+          isHead: false,
+          html: `<span style="color:var(--muted)">참고:</span> ${secParts.join(" · ")}`,
+        });
+      }
+
+      // ===== 섹션 2: KPI 단일 기준 유의미한 변동 캠페인 =====
+      const movers = [];
+      for (const c of campaigns) {
+        const cv = kpiValue(c.cur, kpi);
+        const pv = kpiValue(c.prev, kpi);
+        const baseMax = Math.max(cv, pv);
+        if (baseMax < baseThreshold) continue;
+        const pct = pctChange(cv, pv);
+        if (pct === null) continue;
+        const magnitude = Math.abs(pct);
+        if (magnitude < 20) continue;
+        const score = magnitude * Math.log10(baseMax + 1);
+        movers.push({
+          campaign: c,
+          curV: cv,
+          prevV: pv,
+          pct,
+          score,
+        });
+      }
+      movers.sort((a, b) => b.score - a.score);
+      const topMovers = movers.slice(0, 6);
+
+      bullets.push({ isHead: true, html: `🚨 ${escHtml(kpiLabel)} ±20% 이상 변동 캠페인` });
+      if (!topMovers.length) {
+        bullets.push({
+          isHead: false,
+          html: `<span style="color:var(--muted)">큰 변화 없음. 캠페인별 ${escHtml(kpiLabel)} 변동이 모두 ±20% 이내이거나 베이스가 너무 작습니다.</span>`,
+        });
+      } else {
+        for (const m of topMovers) {
+          const cls = m.pct > 0 ? "mover-up" : "mover-down";
+          const arrow = m.pct > 0 ? "↑" : "↓";
+          // 컨텍스트: 같은 캠페인의 지출 변동
+          const spendCur = kpiValue(m.campaign.cur, "spend");
+          const spendPrev = kpiValue(m.campaign.prev, "spend");
+          const spendPct = pctChange(spendCur, spendPrev);
+          const spendCtx = (spendPct !== null)
+            ? ` <span style="color:var(--muted)">· 지출 <span class="${deltaClass(spendPct, false)}">${fmtDelta(spendPct)}</span></span>`
+            : "";
+          bullets.push({
+            isHead: false,
+            html: `<span class="${cls}">${arrow}</span> "${escHtml(m.campaign.name)}" — ${escHtml(kpiLabel)} ${fmtNumber(m.prevV)} → ${fmtNumber(m.curV)} <span class="${cls}">${fmtDelta(m.pct)}</span>${spendCtx}`,
+          });
+        }
+      }
+
+      return bullets;
+    }
+
+    async function loadComparison() {
       if (!insightCard) return;
       if (!currentAccountId) {
         insightCard.style.display = "none";
@@ -1885,11 +3010,24 @@
       insightCard.style.display = "";
       insightLoading.style.display = "block";
       insightError.style.display = "none";
-      insightMetrics.innerHTML = "";
-      insightBullets.innerHTML = "";
+      insightContent.innerHTML = "";
+
+      const cs = curPeriodStart.value, ce = curPeriodEnd.value;
+      const ps = prevPeriodStart.value, pe = prevPeriodEnd.value;
+      if (!cs || !ce || !ps || !pe) {
+        insightLoading.style.display = "none";
+        insightError.style.display = "block";
+        insightError.textContent = "기간을 모두 입력해주세요.";
+        return;
+      }
+
       try {
-        const qs = new URLSearchParams({ account_id: currentAccountId }).toString();
-        const res = await fetch(`/api/weekly-insights?${qs}`);
+        const qs = new URLSearchParams({
+          account_id: currentAccountId,
+          current_start: cs, current_end: ce,
+          previous_start: ps, previous_end: pe,
+        }).toString();
+        const res = await fetch(`/api/comparison?${qs}`);
         const data = await res.json();
         insightLoading.style.display = "none";
 
@@ -1899,28 +3037,56 @@
           return;
         }
 
-        const p = data.period;
-        insightPeriod.textContent =
-          `이번 주 ${p.this.start}~${p.this.end} (${p.days}일) vs 지난 주 ${p.last.start}~${p.last.end}`;
-
-        const d = data.deltas;
-        insightMetrics.innerHTML =
-          renderInsightMetric("총 지출", fmtCurrency(d.spend.this) + "원", d.spend.pct, { lowerIsBetter: true }) +
-          renderInsightMetric("노출", fmtNumber(d.impressions.this), d.impressions.pct) +
-          renderInsightMetric("클릭", fmtNumber(d.clicks.this), d.clicks.pct) +
-          renderInsightMetric("CTR", d.ctr.this.toFixed(2) + "%", d.ctr.pct) +
-          renderInsightMetric("CPC", fmtCurrency(d.cpc.this) + "원", d.cpc.pct, { lowerIsBetter: true }) +
-          renderInsightMetric("CPM", fmtCurrency(d.cpm.this) + "원", d.cpm.pct, { lowerIsBetter: true });
-
-        insightBullets.innerHTML = (data.bullets || [])
-          .map(b => `<li>${b}</li>`)
-          .join("");
+        // 데이터 annotate (Target/Targeting 부여)
+        annotateRows(data.current.rows || []);
+        annotateRows(data.previous.rows || []);
+        comparisonState.data = data;
+        renderComparisonContent();
       } catch (e) {
         insightLoading.style.display = "none";
         insightError.style.display = "block";
         insightError.textContent = `네트워크 오류: ${e.message}`;
       }
     }
+
+    // Legacy 호환: rerenderAllFromFilters에서 호출되는 이름 유지
+    function loadWeeklyInsights() {
+      applyDefaultsForMode();
+      loadComparison();
+    }
+
+    // 필터 변경 시 재집계만 (재조회 X)
+    function refreshComparisonFromFilters() {
+      if (!comparisonState.data || !comparisonState.data.current) return;
+      if (!(comparisonState.data.current.rows || []).length &&
+          !(comparisonState.data.previous.rows || []).length) return;
+      renderComparisonContent();
+    }
+
+    // 탭 전환
+    document.querySelectorAll("#insightCard .insight-tabs button").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll("#insightCard .insight-tabs button").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        comparisonState.mode = btn.dataset.mode;
+        applyDefaultsForMode();
+        loadComparison();
+      });
+    });
+
+    // 날짜 입력 변경 시 일수 라벨만 업데이트 (조회는 버튼 클릭으로)
+    [curPeriodStart, curPeriodEnd, prevPeriodStart, prevPeriodEnd].forEach(el => {
+      if (el) el.addEventListener("change", updateDayCountLabels);
+    });
+
+    // 조회 / 기본값 버튼
+    const insightApplyBtn = $("insightApply");
+    const insightResetBtn = $("insightReset");
+    if (insightApplyBtn) insightApplyBtn.addEventListener("click", loadComparison);
+    if (insightResetBtn) insightResetBtn.addEventListener("click", () => {
+      applyDefaultsForMode();
+      loadComparison();
+    });
 
     // ===== 광고 계정 관리 =====
     let currentAccountId = null;
@@ -1941,10 +3107,11 @@
 
     function clearMainResults() {
       summaryEl.style.display = "none";
-      chartCard.style.display = "none";
       tableCard.style.display = "none";
       const sc = document.getElementById("summaryCard");
       if (sc) sc.style.display = "none";
+      const dc = document.getElementById("dailyCard");
+      if (dc) dc.style.display = "none";
       const bc = document.getElementById("breakdownCard");
       if (bc) bc.style.display = "none";
       emptyCard.style.display = "block";
@@ -2073,6 +3240,9 @@
         }
       });
     }
+
+    // 일자별 카드 레벨 토글 (페이지 로드 시 한 번만 바인딩)
+    bindDailyToggle();
 
     // 초기 로드: 계정 먼저, 그 다음 인사이트
     (async () => {
