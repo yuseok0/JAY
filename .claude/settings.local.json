@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s \"https://graph.facebook.com/v25.0/act_568276609290906?fields=name,account_status,currency,timezone_name&access_token=EAALvnbIXxkMBRluSHu6KZBKrzPv7n0OytbQ5NCj6FLOzUmK2ZCnxrALAyFBQSUehOiUjDqChyP89ZBYIq4X1PrJVx2gOlmqMCwmagEkasgpoAGNaD6FtJNPx6AAKE2mxf8of7CxyTFABpVEZCCS7UelQdqmghia9MW45Aae52yZAbWdfOuMEc6xJhE73lsGhqShPRtasjxZABgQZCWZC7R4EFSpxpEbL97xiUZAejgvUEbwheMm9ZAA3AwsOUANtgPrC59GjrZCk5OnMLeYAbFezEWjPZAvN\")",
+      "Bash(python -m py_compile \"C:/projects/JAY/app.py\")",
+      "Bash(py -m py_compile \"C:/projects/JAY/app.py\")",
+      "Bash(python3 -m py_compile \"C:/projects/JAY/app.py\")"
+    ]
+  }
+}

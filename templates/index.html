@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Meta Ads 리포트</title>
+  <style>
+    :root {
+      --bg: #f5f6f8;
+      --card: #ffffff;
+      --border: #e3e6eb;
+      --text: #1c1e21;
+      --muted: #65676b;
+      --primary: #1877f2;
+      --primary-hover: #166fe5;
+      --success: #42b72a;
+      --danger: #e74c3c;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.06), 0 2px 6px rgba(0, 0, 0, 0.04);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    h1 {
+      font-size: 22px;
+      margin: 0;
+      font-weight: 700;
+    }
+    .badge {
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-weight: 600;
+    }
+    .badge.ok { background: #e3f4e1; color: #237a14; }
+    .badge.warn { background: #fff4e0; color: #a86b00; }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: var(--shadow);
+      margin-bottom: 16px;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: end;
+    }
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .field label {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    select, input[type="date"] {
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 14px;
+      background: white;
+      min-width: 140px;
+    }
+    button {
+      border: none;
+      border-radius: 6px;
+      padding: 9px 16px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    button.primary { background: var(--primary); color: white; }
+    button.primary:hover { background: var(--primary-hover); }
+    button.secondary { background: white; color: var(--text); border: 1px solid var(--border); }
+    button.secondary:hover { background: #f0f2f5; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    #customRange { display: none; gap: 8px; align-items: center; }
+    #customRange.show { display: flex; }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .metric {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      box-shadow: var(--shadow);
+    }
+    .metric .label {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .metric .value {
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    th, td {
+      padding: 10px 12px;
+      text-align: right;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    th:first-child, td:first-child { text-align: left; }
+    th {
+      background: #f7f8fa;
+      font-weight: 600;
+      color: var(--muted);
+      font-size: 12px;
+      position: sticky;
+      top: 0;
+    }
+    tr:hover td { background: #fafbfc; }
+
+    .table-wrap { overflow-x: auto; }
+
+    #status {
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      font-size: 14px;
+      display: none;
+    }
+    #status.info { display: block; background: #e7f3ff; color: #1864ab; border: 1px solid #c2dcf7; }
+    #status.error { display: block; background: #fde8e8; color: #a02323; border: 1px solid #f5b8b8; }
+    #status.loading { display: block; background: #fff8e1; color: #8a6d1f; border: 1px solid #ffe082; }
+
+    .empty {
+      text-align: center;
+      padding: 40px;
+      color: var(--muted);
+    }
+
+    .chart-wrap {
+      position: relative;
+      height: 320px;
+    }
+
+    /* 주간 인사이트 카드 */
+    .insight-card {
+      background: linear-gradient(135deg, #eaf3ff 0%, #f5f9ff 100%);
+      border: 1px solid #c2dcf7;
+    }
+    .insight-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .insight-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .insight-period {
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .insight-metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .insight-metric {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+    }
+    .insight-metric .label {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 600;
+      margin-bottom: 4px;
+      letter-spacing: 0.02em;
+    }
+    .insight-metric .value {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .insight-metric .delta {
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .delta.up { color: #237a14; }
+    .delta.down { color: #c0392b; }
+    .delta.neutral { color: var(--muted); }
+    .insight-bullets {
+      margin: 0;
+      padding-left: 18px;
+      font-size: 13.5px;
+      color: #1c1e21;
+    }
+    .insight-bullets li { margin-bottom: 4px; }
+    .insight-bullets li:last-child { margin-bottom: 0; }
+    .insight-loading {
+      color: var(--muted);
+      font-size: 13px;
+      padding: 8px 0;
+    }
+    .insight-error {
+      color: #a02323;
+      font-size: 13px;
+      padding: 8px 12px;
+      background: #fde8e8;
+      border-radius: 6px;
+      border: 1px solid #f5b8b8;
+    }
+
+    /* 계정 선택 카드 */
+    .account-card {
+      padding: 14px 20px;
+    }
+    .account-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .account-row .label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+    }
+    #accountSelect {
+      min-width: 280px;
+      flex: 1;
+      max-width: 480px;
+    }
+    .icon-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: white;
+      cursor: pointer;
+      font-size: 16px;
+      line-height: 1;
+      padding: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .icon-btn:hover { background: #f0f2f5; }
+    .icon-btn.danger:hover { background: #fde8e8; color: #c0392b; }
+
+    #addAccountForm {
+      display: none;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    #addAccountForm.show { display: flex; }
+    #newAccountId {
+      flex: 1;
+      min-width: 240px;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    #accountMsg {
+      width: 100%;
+      font-size: 13px;
+      margin-top: 4px;
+      display: none;
+    }
+    #accountMsg.error { display: block; color: #a02323; }
+    #accountMsg.success { display: block; color: #237a14; }
+    .empty-accounts {
+      padding: 24px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    @media (max-width: 640px) {
+      .controls { flex-direction: column; align-items: stretch; }
+      select, input[type="date"] { min-width: 0; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Meta Ads 리포트</h1>
+      {% if credentials_ready %}
+        <span class="badge ok">● 토큰 설정됨</span>
+      {% else %}
+        <span class="badge warn">⚠ .env 미설정</span>
+      {% endif %}
+    </header>
+
+    {% if credentials_ready %}
+    <div class="card account-card">
+      <div class="account-row">
+        <span class="label">광고 계정</span>
+        <select id="accountSelect" disabled>
+          <option>불러오는 중...</option>
+        </select>
+        <button id="addAccountBtn" class="icon-btn" title="계정 추가">＋</button>
+        <button id="deleteAccountBtn" class="icon-btn danger" title="현재 계정 삭제">✕</button>
+      </div>
+      <div id="addAccountForm">
+        <input type="text" id="newAccountId" placeholder="광고 계정 ID 입력 (예: act_1234567890)" />
+        <button id="submitAccountBtn" class="primary">추가</button>
+        <button id="cancelAccountBtn" class="secondary">취소</button>
+        <div id="accountMsg"></div>
+      </div>
+    </div>
+
+    <div id="insightCard" class="card insight-card">
+      <div class="insight-header">
+        <h2 class="insight-title">📊 주간 인사이트</h2>
+        <span id="insightPeriod" class="insight-period">불러오는 중...</span>
+      </div>
+      <div id="insightMetrics" class="insight-metrics"></div>
+      <ul id="insightBullets" class="insight-bullets"></ul>
+      <div id="insightLoading" class="insight-loading">이번 주 데이터 분석 중...</div>
+      <div id="insightError" class="insight-error" style="display:none"></div>
+    </div>
+    {% endif %}
+
+    <div class="card">
+      <div class="controls">
+        <div class="field">
+          <label for="datePreset">기간</label>
+          <select id="datePreset">
+            <option value="today">오늘</option>
+            <option value="yesterday">어제</option>
+            <option value="last_7d" selected>최근 7일</option>
+            <option value="last_14d">최근 14일</option>
+            <option value="last_30d">최근 30일</option>
+            <option value="this_month">이번 달</option>
+            <option value="last_month">지난 달</option>
+            <option value="custom">직접 입력</option>
+          </select>
+        </div>
+
+        <div id="customRange" class="field">
+          <input type="date" id="since" />
+          <span>~</span>
+          <input type="date" id="until" />
+        </div>
+
+        <div class="field">
+          <label for="level">리포트 수준</label>
+          <select id="level">
+            <option value="account">계정 전체</option>
+            <option value="campaign" selected>캠페인별</option>
+            <option value="adset">광고세트별</option>
+            <option value="ad">광고별</option>
+          </select>
+        </div>
+
+        <button id="fetchBtn" class="primary">조회</button>
+        <button id="csvBtn" class="secondary">CSV 다운로드</button>
+      </div>
+    </div>
+
+    <div id="status"></div>
+
+    <div id="summary" class="summary" style="display:none"></div>
+
+    <div id="chartCard" class="card" style="display:none">
+      <div class="chart-wrap">
+        <canvas id="chart"></canvas>
+      </div>
+    </div>
+
+    <div id="tableCard" class="card" style="display:none">
+      <div class="table-wrap">
+        <table id="resultTable">
+          <thead></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="emptyCard" class="card">
+      <div class="empty">
+        {% if credentials_ready %}
+          기간을 선택하고 <b>조회</b> 버튼을 눌러주세요.
+        {% else %}
+          <code>.env</code> 파일에 <code>META_ACCESS_TOKEN</code>과 <code>META_AD_ACCOUNT_ID</code>를 입력한 뒤 서버를 다시 시작하세요.
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const datePresetEl = $("datePreset");
+    const customRangeEl = $("customRange");
+    const sinceEl = $("since");
+    const untilEl = $("until");
+    const levelEl = $("level");
+    const fetchBtn = $("fetchBtn");
+    const csvBtn = $("csvBtn");
+    const statusEl = $("status");
+    const summaryEl = $("summary");
+    const chartCard = $("chartCard");
+    const tableCard = $("tableCard");
+    const emptyCard = $("emptyCard");
+    const tableEl = $("resultTable");
+
+    let chartInstance = null;
+
+    datePresetEl.addEventListener("change", () => {
+      customRangeEl.classList.toggle("show", datePresetEl.value === "custom");
+    });
+
+    const today = new Date();
+    const weekAgo = new Date(today.getTime() - 7 * 86400000);
+    sinceEl.value = weekAgo.toISOString().slice(0, 10);
+    untilEl.value = today.toISOString().slice(0, 10);
+
+    function buildQuery() {
+      const params = new URLSearchParams();
+      params.set("level", levelEl.value);
+      if (currentAccountId) params.set("account_id", currentAccountId);
+      if (datePresetEl.value === "custom") {
+        if (!sinceEl.value || !untilEl.value) {
+          throw new Error("시작일과 종료일을 모두 입력해주세요.");
+        }
+        params.set("since", sinceEl.value);
+        params.set("until", untilEl.value);
+      } else {
+        params.set("date_preset", datePresetEl.value);
+      }
+      return params.toString();
+    }
+
+    function setStatus(type, msg) {
+      statusEl.className = type;
+      statusEl.textContent = msg;
+    }
+    function clearStatus() {
+      statusEl.className = "";
+      statusEl.textContent = "";
+    }
+
+    function fmtNumber(v) {
+      const n = Number(v);
+      if (!isFinite(n)) return v ?? "-";
+      return n.toLocaleString("ko-KR", { maximumFractionDigits: 2 });
+    }
+    function fmtCurrency(v) {
+      const n = Number(v);
+      if (!isFinite(n)) return v ?? "-";
+      return n.toLocaleString("ko-KR", { maximumFractionDigits: 2 });
+    }
+    function fmtPercent(v) {
+      const n = Number(v);
+      if (!isFinite(n)) return v ?? "-";
+      return n.toFixed(2) + "%";
+    }
+
+    const COLUMN_DEFS = {
+      account:  [["계정", "account_id", "text"]],
+      campaign: [["캠페인", "campaign_name", "text"]],
+      adset:    [["캠페인", "campaign_name", "text"], ["광고세트", "adset_name", "text"]],
+      ad:       [["캠페인", "campaign_name", "text"], ["광고세트", "adset_name", "text"], ["광고", "ad_name", "text"]],
+    };
+    const METRIC_COLS = [
+      ["노출", "impressions", "number"],
+      ["클릭", "clicks", "number"],
+      ["지출", "spend", "currency"],
+      ["CPC", "cpc", "currency"],
+      ["CPM", "cpm", "currency"],
+      ["CTR", "ctr", "percent"],
+      ["도달", "reach", "number"],
+      ["빈도", "frequency", "number"],
+    ];
+
+    function renderTable(rows, level) {
+      const dimCols = COLUMN_DEFS[level] || COLUMN_DEFS.campaign;
+      const cols = [...dimCols, ...METRIC_COLS];
+
+      const thead = tableEl.querySelector("thead");
+      const tbody = tableEl.querySelector("tbody");
+      thead.innerHTML = "<tr>" + cols.map(c => `<th>${c[0]}</th>`).join("") + "</tr>";
+
+      if (!rows.length) {
+        tbody.innerHTML = `<tr><td colspan="${cols.length}" style="text-align:center;color:var(--muted);padding:24px">데이터가 없습니다.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = rows.map(row => {
+        return "<tr>" + cols.map(([_, key, type]) => {
+          const v = row[key];
+          let display = v ?? "-";
+          if (type === "number") display = fmtNumber(v);
+          else if (type === "currency") display = fmtCurrency(v);
+          else if (type === "percent") display = fmtPercent(v);
+          return `<td>${display}</td>`;
+        }).join("") + "</tr>";
+      }).join("");
+    }
+
+    function renderSummary(rows) {
+      const totals = rows.reduce((acc, r) => {
+        acc.impressions += Number(r.impressions) || 0;
+        acc.clicks += Number(r.clicks) || 0;
+        acc.spend += Number(r.spend) || 0;
+        return acc;
+      }, { impressions: 0, clicks: 0, spend: 0 });
+      const ctr = totals.impressions ? (totals.clicks / totals.impressions) * 100 : 0;
+      const cpc = totals.clicks ? totals.spend / totals.clicks : 0;
+      const cpm = totals.impressions ? (totals.spend / totals.impressions) * 1000 : 0;
+
+      summaryEl.innerHTML = `
+        <div class="metric"><div class="label">총 지출</div><div class="value">${fmtCurrency(totals.spend)}</div></div>
+        <div class="metric"><div class="label">노출</div><div class="value">${fmtNumber(totals.impressions)}</div></div>
+        <div class="metric"><div class="label">클릭</div><div class="value">${fmtNumber(totals.clicks)}</div></div>
+        <div class="metric"><div class="label">CTR</div><div class="value">${fmtPercent(ctr)}</div></div>
+        <div class="metric"><div class="label">CPC</div><div class="value">${fmtCurrency(cpc)}</div></div>
+        <div class="metric"><div class="label">CPM</div><div class="value">${fmtCurrency(cpm)}</div></div>
+      `;
+    }
+
+    function renderChart(rows, level) {
+      const labelKey = level === "ad" ? "ad_name"
+                     : level === "adset" ? "adset_name"
+                     : level === "account" ? "account_id"
+                     : "campaign_name";
+
+      const top = [...rows]
+        .sort((a, b) => (Number(b.spend) || 0) - (Number(a.spend) || 0))
+        .slice(0, 10);
+
+      const labels = top.map(r => r[labelKey] || "(이름 없음)");
+      const data = top.map(r => Number(r.spend) || 0);
+
+      const ctx = document.getElementById("chart");
+      if (chartInstance) chartInstance.destroy();
+      chartInstance = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels,
+          datasets: [{
+            label: "지출",
+            data,
+            backgroundColor: "#1877f2",
+            borderRadius: 4,
+          }],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            title: { display: true, text: "지출 상위 10개", font: { size: 14 } },
+          },
+          scales: {
+            y: { beginAtZero: true, ticks: { callback: v => v.toLocaleString("ko-KR") } },
+          },
+        },
+      });
+    }
+
+    async function fetchInsights() {
+      let qs;
+      try { qs = buildQuery(); }
+      catch (e) { setStatus("error", e.message); return; }
+
+      setStatus("loading", "조회 중...");
+      fetchBtn.disabled = true;
+      csvBtn.disabled = true;
+      emptyCard.style.display = "none";
+
+      try {
+        const res = await fetch(`/api/insights?${qs}`);
+        const data = await res.json();
+        if (!res.ok || data.error) {
+          setStatus("error", data.error || `요청 실패 (${res.status})`);
+          summaryEl.style.display = "none";
+          chartCard.style.display = "none";
+          tableCard.style.display = "none";
+          return;
+        }
+        clearStatus();
+        const rows = data.data || [];
+        if (!rows.length) {
+          setStatus("info", "선택한 기간에 데이터가 없습니다.");
+          summaryEl.style.display = "none";
+          chartCard.style.display = "none";
+          tableCard.style.display = "none";
+          return;
+        }
+        renderSummary(rows);
+        renderTable(rows, levelEl.value);
+        renderChart(rows, levelEl.value);
+        summaryEl.style.display = "grid";
+        chartCard.style.display = "block";
+        tableCard.style.display = "block";
+      } catch (e) {
+        setStatus("error", `오류: ${e.message}`);
+      } finally {
+        fetchBtn.disabled = false;
+        csvBtn.disabled = false;
+      }
+    }
+
+    function downloadCsv() {
+      let qs;
+      try { qs = buildQuery(); }
+      catch (e) { setStatus("error", e.message); return; }
+      window.location.href = `/api/insights.csv?${qs}`;
+    }
+
+    fetchBtn.addEventListener("click", fetchInsights);
+    csvBtn.addEventListener("click", downloadCsv);
+
+    // ===== 주간 인사이트 =====
+    const insightCard = $("insightCard");
+    const insightPeriod = $("insightPeriod");
+    const insightMetrics = $("insightMetrics");
+    const insightBullets = $("insightBullets");
+    const insightLoading = $("insightLoading");
+    const insightError = $("insightError");
+
+    function deltaClass(pct, inverse = false) {
+      if (pct === null || pct === undefined || pct === 0) return "neutral";
+      const isUp = pct > 0;
+      return (isUp !== inverse) ? "up" : "down";
+    }
+
+    function fmtDelta(pct) {
+      if (pct === null || pct === undefined) return "비교 불가";
+      const arrow = pct > 0 ? "▲" : (pct < 0 ? "▼" : "—");
+      return `${arrow} ${Math.abs(pct).toFixed(1)}%`;
+    }
+
+    function renderInsightMetric(label, value, pct, opts = {}) {
+      const inverse = !!opts.lowerIsBetter;
+      const cls = deltaClass(pct, inverse);
+      return `
+        <div class="insight-metric">
+          <div class="label">${label}</div>
+          <div class="value">${value}</div>
+          <div class="delta ${cls}">${fmtDelta(pct)}</div>
+        </div>
+      `;
+    }
+
+    async function loadWeeklyInsights() {
+      if (!insightCard) return;
+      if (!currentAccountId) {
+        insightCard.style.display = "none";
+        return;
+      }
+      insightCard.style.display = "";
+      insightLoading.style.display = "block";
+      insightError.style.display = "none";
+      insightMetrics.innerHTML = "";
+      insightBullets.innerHTML = "";
+      try {
+        const qs = new URLSearchParams({ account_id: currentAccountId }).toString();
+        const res = await fetch(`/api/weekly-insights?${qs}`);
+        const data = await res.json();
+        insightLoading.style.display = "none";
+
+        if (!res.ok || data.error) {
+          insightError.style.display = "block";
+          insightError.textContent = data.error || `오류 (${res.status})`;
+          return;
+        }
+
+        const p = data.period;
+        insightPeriod.textContent =
+          `이번 주 ${p.this.start}~${p.this.end} (${p.days}일) vs 지난 주 ${p.last.start}~${p.last.end}`;
+
+        const d = data.deltas;
+        insightMetrics.innerHTML =
+          renderInsightMetric("총 지출", fmtCurrency(d.spend.this) + "원", d.spend.pct, { lowerIsBetter: true }) +
+          renderInsightMetric("노출", fmtNumber(d.impressions.this), d.impressions.pct) +
+          renderInsightMetric("클릭", fmtNumber(d.clicks.this), d.clicks.pct) +
+          renderInsightMetric("CTR", d.ctr.this.toFixed(2) + "%", d.ctr.pct) +
+          renderInsightMetric("CPC", fmtCurrency(d.cpc.this) + "원", d.cpc.pct, { lowerIsBetter: true }) +
+          renderInsightMetric("CPM", fmtCurrency(d.cpm.this) + "원", d.cpm.pct, { lowerIsBetter: true });
+
+        insightBullets.innerHTML = (data.bullets || [])
+          .map(b => `<li>${b}</li>`)
+          .join("");
+      } catch (e) {
+        insightLoading.style.display = "none";
+        insightError.style.display = "block";
+        insightError.textContent = `네트워크 오류: ${e.message}`;
+      }
+    }
+
+    // ===== 광고 계정 관리 =====
+    let currentAccountId = null;
+    const accountSelect = $("accountSelect");
+    const addAccountBtn = $("addAccountBtn");
+    const deleteAccountBtn = $("deleteAccountBtn");
+    const addAccountForm = $("addAccountForm");
+    const newAccountId = $("newAccountId");
+    const submitAccountBtn = $("submitAccountBtn");
+    const cancelAccountBtn = $("cancelAccountBtn");
+    const accountMsg = $("accountMsg");
+
+    function setAccountMsg(type, text) {
+      if (!accountMsg) return;
+      accountMsg.className = type || "";
+      accountMsg.textContent = text || "";
+    }
+
+    function clearMainResults() {
+      summaryEl.style.display = "none";
+      chartCard.style.display = "none";
+      tableCard.style.display = "none";
+      emptyCard.style.display = "block";
+      clearStatus();
+    }
+
+    function renderAccountOptions(accounts, selectId) {
+      if (!accountSelect) return;
+      if (!accounts.length) {
+        accountSelect.innerHTML = '<option value="">등록된 계정 없음 — ＋ 버튼으로 추가</option>';
+        accountSelect.disabled = true;
+        currentAccountId = null;
+        if (deleteAccountBtn) deleteAccountBtn.disabled = true;
+        return;
+      }
+      accountSelect.innerHTML = accounts.map(a => {
+        const label = a.name && a.name !== a.id ? `${a.name} — ${a.id}` : a.id;
+        return `<option value="${a.id}">${label}</option>`;
+      }).join("");
+      accountSelect.disabled = false;
+      if (deleteAccountBtn) deleteAccountBtn.disabled = false;
+
+      const saved = localStorage.getItem("metaAccountId");
+      const target = selectId || (saved && accounts.find(a => a.id === saved) ? saved : accounts[0].id);
+      accountSelect.value = target;
+      currentAccountId = accountSelect.value;
+      localStorage.setItem("metaAccountId", currentAccountId);
+    }
+
+    async function loadAccounts(selectId) {
+      if (!accountSelect) return;
+      try {
+        const res = await fetch("/api/accounts");
+        const data = await res.json();
+        renderAccountOptions(data.accounts || [], selectId);
+      } catch (e) {
+        console.error(e);
+        accountSelect.innerHTML = '<option value="">로딩 실패</option>';
+      }
+    }
+
+    if (accountSelect) {
+      accountSelect.addEventListener("change", () => {
+        currentAccountId = accountSelect.value;
+        localStorage.setItem("metaAccountId", currentAccountId);
+        clearMainResults();
+        loadWeeklyInsights();
+      });
+    }
+
+    if (addAccountBtn) {
+      addAccountBtn.addEventListener("click", () => {
+        addAccountForm.classList.toggle("show");
+        setAccountMsg("", "");
+        if (addAccountForm.classList.contains("show")) newAccountId.focus();
+      });
+    }
+
+    if (cancelAccountBtn) {
+      cancelAccountBtn.addEventListener("click", () => {
+        addAccountForm.classList.remove("show");
+        newAccountId.value = "";
+        setAccountMsg("", "");
+      });
+    }
+
+    async function submitAddAccount() {
+      const raw = newAccountId.value.trim();
+      if (!raw) { setAccountMsg("error", "계정 ID를 입력해주세요."); return; }
+      submitAccountBtn.disabled = true;
+      setAccountMsg("", "검증 중...");
+      try {
+        const res = await fetch("/api/accounts", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: raw }),
+        });
+        const data = await res.json();
+        if (!res.ok || data.error) {
+          setAccountMsg("error", data.error || `오류 (${res.status})`);
+          return;
+        }
+        setAccountMsg("success", `추가됨: ${data.account.name || data.account.id}`);
+        newAccountId.value = "";
+        await loadAccounts(data.account.id);
+        clearMainResults();
+        loadWeeklyInsights();
+        setTimeout(() => {
+          addAccountForm.classList.remove("show");
+          setAccountMsg("", "");
+        }, 1500);
+      } catch (e) {
+        setAccountMsg("error", `네트워크 오류: ${e.message}`);
+      } finally {
+        submitAccountBtn.disabled = false;
+      }
+    }
+
+    if (submitAccountBtn) submitAccountBtn.addEventListener("click", submitAddAccount);
+    if (newAccountId) newAccountId.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") { e.preventDefault(); submitAddAccount(); }
+    });
+
+    if (deleteAccountBtn) {
+      deleteAccountBtn.addEventListener("click", async () => {
+        if (!currentAccountId) return;
+        const label = accountSelect.options[accountSelect.selectedIndex].text;
+        if (!confirm(`"${label}" 계정을 목록에서 삭제할까요?\n(Meta 광고 계정 자체가 삭제되는 게 아니라, 이 리포트 도구의 등록 목록에서만 제거됩니다)`)) return;
+        try {
+          const res = await fetch(`/api/accounts/${encodeURIComponent(currentAccountId)}`, { method: "DELETE" });
+          const data = await res.json();
+          if (!res.ok || data.error) {
+            alert(data.error || `삭제 실패 (${res.status})`);
+            return;
+          }
+          localStorage.removeItem("metaAccountId");
+          await loadAccounts();
+          clearMainResults();
+          loadWeeklyInsights();
+        } catch (e) {
+          alert(`네트워크 오류: ${e.message}`);
+        }
+      });
+    }
+
+    // 초기 로드: 계정 먼저, 그 다음 인사이트
+    (async () => {
+      if (accountSelect) await loadAccounts();
+      if (insightCard && currentAccountId) loadWeeklyInsights();
+    })();
+  </script>
+</body>
+</html>
