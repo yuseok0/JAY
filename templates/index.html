@@ -319,6 +319,374 @@
       font-size: 14px;
     }
 
+    /* 컬럼 필터 (캠페인/광고세트/광고) */
+    tr.filter-row td {
+      padding: 4px 6px;
+      background: #fafbfc;
+      border-bottom: 2px solid var(--border);
+      text-align: left;
+    }
+    .filter-control { position: relative; display: inline-block; width: 100%; }
+    .filter-toggle {
+      font-size: 11px;
+      padding: 4px 8px;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: normal;
+      color: var(--text);
+      width: 100%;
+      max-width: 220px;
+      text-align: left;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .filter-toggle:hover { background: #f0f2f5; }
+    .filter-control.active .filter-toggle {
+      background: #e7f3ff;
+      border-color: var(--primary);
+      color: var(--primary);
+      font-weight: 600;
+    }
+    .filter-popup {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+      padding: 8px;
+      width: 360px;
+      z-index: 100;
+      font-size: 12px;
+      font-weight: normal;
+    }
+    .filter-popup.hidden { display: none; }
+    .filter-search {
+      width: 100%;
+      padding: 6px 8px;
+      font-size: 12px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      margin-bottom: 6px;
+      min-width: 0;
+    }
+    .filter-all-row {
+      display: flex;
+      align-items: center;
+      padding: 4px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+    .filter-options {
+      max-height: 240px;
+      overflow-y: auto;
+      margin-bottom: 6px;
+    }
+    .filter-options label {
+      display: block;
+      padding: 4px 6px;
+      cursor: pointer;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      border-radius: 3px;
+    }
+    .filter-options label:hover { background: #f0f2f5; }
+    .filter-options input[type=checkbox] { margin-right: 8px; vertical-align: middle; }
+    .filter-actions {
+      display: flex;
+      gap: 6px;
+      padding-top: 6px;
+      border-top: 1px solid var(--border);
+    }
+    .filter-actions button { font-size: 11px; padding: 5px 12px; flex: 1; }
+    .filter-empty {
+      color: var(--muted);
+      padding: 8px;
+      text-align: center;
+      font-size: 11px;
+    }
+    #filterSummary {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 8px;
+      display: none;
+    }
+    #filterSummary.show { display: block; }
+    #filterSummary .clear-all {
+      color: var(--primary);
+      cursor: pointer;
+      text-decoration: underline;
+      margin-left: 6px;
+    }
+
+    /* SUMMARY 테이블 */
+    #summaryCard h2 {
+      font-size: 16px;
+      font-weight: 700;
+      margin: 0 0 12px 0;
+    }
+    .summary-filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 12px;
+      padding: 10px 12px;
+      background: #f7f9fc;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+    .summary-filter-bar .filter-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      margin-right: 2px;
+    }
+    .summary-filter-bar .filter-control { width: auto; }
+    .summary-filter-bar .filter-toggle { min-width: 110px; max-width: 240px; }
+    .summary-filter-bar .clear-all-btn {
+      font-size: 11px;
+      padding: 4px 10px;
+      margin-left: auto;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .summary-filter-bar .clear-all-btn:hover { background: white; color: var(--text); }
+    table.summary-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    .summary-table th, .summary-table td {
+      padding: 6px 10px;
+      text-align: right;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    .summary-table th {
+      background: #5b6c7e;
+      color: white;
+      font-weight: 600;
+      font-size: 11px;
+      text-align: center;
+      letter-spacing: 0.02em;
+      border-bottom: none;
+    }
+    .summary-table .col-target,
+    .summary-table .col-targeting {
+      text-align: left;
+    }
+    .summary-table tbody tr.data-row td.col-target {
+      background: #fafbfc;
+      font-weight: 600;
+      border-right: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    .summary-table tbody tr.data-row td.col-targeting {
+      padding-left: 12px;
+    }
+    .summary-table tbody tr.subtotal-row td {
+      background: #d6e5fa;
+      font-weight: 700;
+      color: #1d4373;
+    }
+    .summary-table tbody tr.total-row td {
+      background: #5b6c7e;
+      color: white;
+      font-weight: 700;
+      border-top: 2px solid #3e4a5a;
+    }
+    .summary-table tbody tr.data-row:hover td:not(.col-target) {
+      background: #fafbfc;
+    }
+    .summary-table td.metric-none {
+      background:
+        repeating-linear-gradient(45deg,
+          transparent, transparent 4px,
+          rgba(0,0,0,0.07) 4px, rgba(0,0,0,0.07) 5px),
+        #f5f5f5;
+    }
+    .summary-table tbody tr.subtotal-row td.metric-none,
+    .summary-table tbody tr.total-row td.metric-none {
+      background:
+        repeating-linear-gradient(45deg,
+          transparent, transparent 4px,
+          rgba(255,255,255,0.18) 4px, rgba(255,255,255,0.18) 5px),
+        currentColor;
+      opacity: 0.85;
+    }
+
+    /* VIEW/VTR 데이터 없음 (이미지 소재) — 회색 빗금 */
+    td.no-data {
+      background:
+        repeating-linear-gradient(45deg,
+          transparent, transparent 4px,
+          rgba(0,0,0,0.07) 4px, rgba(0,0,0,0.07) 5px),
+        #f5f5f5;
+    }
+
+    /* 타겟×에셋 계층 카드 */
+    .breakdown-campaign {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 10px;
+      background: white;
+      overflow: hidden;
+    }
+    .breakdown-camp-header {
+      padding: 12px 14px;
+      cursor: pointer;
+      background: #f7f9fc;
+      border-bottom: 1px solid var(--border);
+    }
+    .breakdown-camp-header:hover { background: #eff3f8; }
+    .breakdown-camp-name {
+      font-weight: 700;
+      font-size: 14px;
+      margin: 0 0 4px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .camp-status-badge {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: #e3f4e1;
+      color: #237a14;
+      font-weight: 600;
+    }
+    .camp-status-badge.paused { background: #fff4e0; color: #a86b00; }
+    .camp-status-badge.archived, .camp-status-badge.deleted { background: #f0f0f0; color: #777; }
+    .breakdown-camp-meta {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .progress-pair {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 6px;
+    }
+    .progress-block .progress-label {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 600;
+      margin-bottom: 4px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .progress-track {
+      background: #e8eaed;
+      border-radius: 4px;
+      height: 8px;
+      overflow: hidden;
+      position: relative;
+    }
+    .progress-fill {
+      height: 100%;
+      transition: width 0.3s;
+    }
+    .progress-fill.time { background: #1877f2; }
+    .progress-fill.spend.on { background: #2c9b3a; }
+    .progress-fill.spend.over { background: #c0392b; }
+    .progress-fill.spend.under { background: #1877f2; }
+    .progress-fill.over-100 { background: repeating-linear-gradient(45deg, #c0392b, #c0392b 4px, #a52d22 4px, #a52d22 8px); }
+    .progress-pct {
+      font-weight: 700;
+      font-size: 12px;
+      color: var(--text);
+    }
+    .camp-period-metrics {
+      font-size: 12px;
+      color: #555;
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px dashed var(--border);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .camp-period-metrics span b { color: var(--text); }
+    .breakdown-override-form {
+      display: none;
+      margin-top: 10px;
+      padding: 10px;
+      background: white;
+      border-radius: 6px;
+      border: 1px dashed var(--border);
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .breakdown-override-form.show { display: flex; }
+    .breakdown-override-form input[type="date"] { min-width: 130px; font-size: 12px; padding: 4px 8px; }
+    .breakdown-override-form button { font-size: 12px; padding: 5px 10px; }
+    .breakdown-edit-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .breakdown-edit-btn:hover { background: white; color: var(--text); }
+    .breakdown-adsets {
+      display: none;
+      padding: 4px 8px 8px;
+    }
+    .breakdown-adsets.open { display: block; }
+    .breakdown-adset {
+      border-left: 3px solid #d3deea;
+      margin: 6px 8px;
+      padding: 8px 12px;
+      background: #fafbfc;
+      border-radius: 0 4px 4px 0;
+    }
+    .breakdown-adset-name {
+      font-weight: 600;
+      font-size: 13px;
+      margin: 0 0 4px 0;
+      cursor: pointer;
+    }
+    .breakdown-adset-metrics {
+      font-size: 11px;
+      color: var(--muted);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .breakdown-ads {
+      display: none;
+      margin-top: 6px;
+      padding-left: 8px;
+    }
+    .breakdown-ads.open { display: block; }
+    .breakdown-ad {
+      font-size: 11px;
+      padding: 4px 8px;
+      border-bottom: 1px dotted #e3e6eb;
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .breakdown-ad:last-child { border-bottom: none; }
+    .breakdown-ad-name { flex: 1; color: #444; }
+    .breakdown-ad-metrics { color: var(--muted); font-family: 'Consolas', monospace; font-size: 11px; }
+    .caret { display: inline-block; font-size: 10px; color: var(--muted); transition: transform 0.15s; }
+    .caret.open { transform: rotate(90deg); }
+
     @media (max-width: 640px) {
       .controls { flex-direction: column; align-items: stretch; }
       select, input[type="date"] { min-width: 0; width: 100%; }
@@ -400,6 +768,7 @@
 
         <button id="fetchBtn" class="primary">조회</button>
         <button id="csvBtn" class="secondary">CSV 다운로드</button>
+        <button id="xlsxBtn" class="secondary">📥 Excel 다운로드</button>
       </div>
     </div>
 
@@ -413,13 +782,34 @@
       </div>
     </div>
 
+    <div id="summaryCard" class="card" style="display:none">
+      <h2>📊 SUMMARY — Target × Targeting</h2>
+      <div class="summary-filter-bar" id="summaryFilterBar"></div>
+      <div id="summaryFilterStatus" style="font-size:12px;color:var(--muted);margin-bottom:8px;display:none"></div>
+      <div class="table-wrap">
+        <table class="summary-table" id="summaryTable">
+          <thead></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
     <div id="tableCard" class="card" style="display:none">
+      <h2 style="font-size:14px;font-weight:700;margin:0 0 8px 0;color:var(--muted)">상세 데이터 (필터링 가능)</h2>
+      <div id="filterSummary"></div>
       <div class="table-wrap">
         <table id="resultTable">
           <thead></thead>
           <tbody></tbody>
         </table>
       </div>
+    </div>
+
+    <div id="breakdownCard" class="card" style="display:none">
+      <h2 style="font-size:16px;font-weight:700;margin:0 0 12px 0">🎯 타겟 × 에셋 — 진행률 / 소진률</h2>
+      <div id="breakdownLoading" style="color:var(--muted);font-size:13px;display:none">불러오는 중...</div>
+      <div id="breakdownError" style="color:#a02323;font-size:13px;display:none"></div>
+      <div id="breakdownList"></div>
     </div>
 
     <div id="emptyCard" class="card">
@@ -506,42 +896,554 @@
       account:  [["계정", "account_id", "text"]],
       campaign: [["캠페인", "campaign_name", "text"]],
       adset:    [["캠페인", "campaign_name", "text"], ["광고세트", "adset_name", "text"]],
-      ad:       [["캠페인", "campaign_name", "text"], ["광고세트", "adset_name", "text"], ["광고", "ad_name", "text"]],
+      ad:       [["날짜", "date_start", "text"], ["캠페인", "campaign_name", "text"], ["광고세트", "adset_name", "text"], ["광고", "ad_name", "text"]],
     };
     const METRIC_COLS = [
       ["노출", "impressions", "number"],
       ["클릭", "clicks", "number"],
-      ["지출", "spend", "currency"],
-      ["CPC", "cpc", "currency"],
-      ["CPM", "cpm", "currency"],
       ["CTR", "ctr", "percent"],
-      ["도달", "reach", "number"],
-      ["빈도", "frequency", "number"],
+      ["VIEW", "video_views", "number_nullable"],
+      ["VTR", "vtr", "percent_nullable"],
+      ["전환", "conversions", "number"],
+      ["CVR", "cvr", "percent"],
+      ["지출", "spend", "currency"],
     ];
 
-    function renderTable(rows, level) {
+    // ===== Target / Targeting 파싱 (BC 네이밍 규칙 기준) =====
+    function parseTarget(campaignName) {
+      const c = (campaignName || "").toLowerCase();
+      if (c.includes("kinder")) return "Kinder";
+      if (c.includes("adults")) return "Adults";
+      if (c.includes("younglearners") || c.includes("youngleaners")) return "Young Learners";
+      if (c.includes("parents")) return "Kinder";
+      return "기타";
+    }
+
+    function parseTargeting(campaignName, adsetName) {
+      const src = ((adsetName || "") + " " + (campaignName || "")).toLowerCase();
+      let main = null;
+      if (/\ba\+|aplus/.test(src)) main = "A+";
+      else if (/\blal/.test(src)) main = "LAL";
+      else if (/prospect|\bpt\b/.test(src)) main = "PT";
+      else if (/ilsan/.test(src)) main = "Ilsan";
+      if (!main) {
+        const last = (adsetName || "").split("-").pop() || "기타";
+        return last;
+      }
+      const mods = [];
+      if (/primary/.test(src)) mods.push("Primary");
+      if (/summer/.test(src)) mods.push("summer");
+      if (/winter/.test(src)) mods.push("winter");
+      if (/\bbau\b/.test(src) && !mods.length) mods.push("BAU");
+      return mods.length ? `${main} - ${mods.join(", ")}` : main;
+    }
+
+    function annotateRows(rows) {
+      for (const r of rows) {
+        r._target = parseTarget(r.campaign_name);
+        r._targeting = parseTargeting(r.campaign_name, r.adset_name);
+      }
+      return rows;
+    }
+
+    // ===== 집계 (요약 메트릭 산출) =====
+    function aggregateMetrics(rows) {
+      let imps = 0, clicks = 0, spend = 0, conv = 0;
+      let hasVideo = false, videoViews = 0;
+      for (const r of rows) {
+        imps += Number(r.impressions) || 0;
+        clicks += Number(r.clicks) || 0;
+        spend += Number(r.spend) || 0;
+        conv += Number(r.conversions) || 0;
+        if (r.video_views !== null && r.video_views !== undefined) {
+          hasVideo = true;
+          videoViews += Number(r.video_views) || 0;
+        }
+      }
+      const views = hasVideo ? videoViews : null;
+      return {
+        impressions: imps,
+        clicks: clicks,
+        ctr: imps ? (clicks / imps * 100) : 0,
+        video_views: views,
+        vtr: (views !== null && imps) ? (views / imps * 100) : null,
+        conversions: conv,
+        cvr: imps ? (conv / imps * 100) : 0,
+        spend: spend,
+        cpm: imps ? (spend / imps * 1000) : 0,
+        cpc: clicks ? (spend / clicks) : 0,
+        cpv: (views !== null && views > 0) ? (spend / views) : null,
+        cpa: conv ? (spend / conv) : 0,
+      };
+    }
+
+    // ===== 통합 필터 상태 (SUMMARY + 상세 표 + 차트 + 인사이트 카드 모두 사용) =====
+    const SUMMARY_FILTERS = [
+      { key: "_target", label: "Target" },
+      { key: "_targeting", label: "Targeting" },
+      { key: "campaign_name", label: "캠페인" },
+      { key: "adset_name", label: "광고세트" },
+      { key: "ad_name", label: "광고" },
+    ];
+    let summaryState = {
+      allRows: [],
+      level: "campaign",
+      filters: {},  // key → Set of selected values
+    };
+
+    function applySummaryFilters() {
+      const { allRows, filters } = summaryState;
+      const activeKeys = Object.keys(filters).filter(k => filters[k] && filters[k].size > 0);
+      if (!activeKeys.length) return allRows;
+      return allRows.filter(r => activeKeys.every(k => filters[k].has(r[k] || "")));
+    }
+
+    function renderSummaryFilterBar() {
+      const bar = $("summaryFilterBar");
+      if (!bar) return;
+      const allRows = summaryState.allRows;
+      const itemsHtml = SUMMARY_FILTERS.map(({ key, label }) => {
+        const uniques = [...new Set(allRows.map(r => (r[key] || "").toString()))].filter(v => v !== "").sort();
+        const active = summaryState.filters[key];
+        const activeCnt = active ? active.size : 0;
+        const btnLabel = activeCnt > 0 ? `${label}: ${activeCnt}개` : `${label}: 전체 ▾`;
+        const activeCls = activeCnt > 0 ? "active" : "";
+        const isChecked = (v) => (!active || active.size === 0 || active.has(v)) ? "checked" : "";
+        const allChecked = (!active || active.size === 0) ? "checked" : "";
+        return `<div class="filter-control ${activeCls}" data-col="${key}">
+          <button type="button" class="filter-toggle">${btnLabel}</button>
+          <div class="filter-popup hidden">
+            <input type="text" class="filter-search" placeholder="검색..." />
+            <label class="filter-all-row"><input type="checkbox" class="filter-all-cb" ${allChecked}> (전체 선택)</label>
+            <div class="filter-options">
+              ${uniques.length ? uniques.map(v => `<label title="${escHtml(v)}"><input type="checkbox" value="${escHtml(v)}" ${isChecked(v)}> ${escHtml(v)}</label>`).join("") : '<div class="filter-empty">옵션 없음</div>'}
+            </div>
+            <div class="filter-actions">
+              <button type="button" class="primary filter-apply">적용</button>
+              <button type="button" class="secondary filter-reset">초기화</button>
+            </div>
+          </div>
+        </div>`;
+      }).join("");
+      bar.innerHTML = itemsHtml + '<button class="clear-all-btn" id="summaryClearAll">모두 초기화</button>';
+
+      attachSummaryFilterEvents();
+    }
+
+    function attachSummaryFilterEvents() {
+      document.querySelectorAll("#summaryFilterBar .filter-control").forEach(control => {
+        const col = control.dataset.col;
+        const toggle = control.querySelector(".filter-toggle");
+        const popup = control.querySelector(".filter-popup");
+        const search = control.querySelector(".filter-search");
+        const allCb = control.querySelector(".filter-all-cb");
+        const optionCbs = control.querySelectorAll(".filter-options input[type=checkbox]");
+        const applyBtn = control.querySelector(".filter-apply");
+        const resetBtn = control.querySelector(".filter-reset");
+
+        toggle.addEventListener("click", (e) => {
+          e.stopPropagation();
+          document.querySelectorAll("#summaryFilterBar .filter-popup").forEach(p => {
+            if (p !== popup) p.classList.add("hidden");
+          });
+          popup.classList.toggle("hidden");
+          if (!popup.classList.contains("hidden")) { search.focus(); search.select(); }
+        });
+        search.addEventListener("input", () => {
+          const q = search.value.toLowerCase();
+          optionCbs.forEach(cb => {
+            cb.parentElement.style.display = cb.value.toLowerCase().includes(q) ? "" : "none";
+          });
+        });
+        if (allCb) allCb.addEventListener("change", () => {
+          optionCbs.forEach(cb => {
+            if (cb.parentElement.style.display !== "none") cb.checked = allCb.checked;
+          });
+        });
+        optionCbs.forEach(cb => {
+          cb.addEventListener("change", () => {
+            const vis = [...optionCbs].filter(c => c.parentElement.style.display !== "none");
+            if (allCb) allCb.checked = vis.every(c => c.checked);
+          });
+        });
+        applyBtn.addEventListener("click", () => {
+          const selected = [...optionCbs].filter(cb => cb.checked).map(cb => cb.value);
+          if (selected.length === 0 || selected.length === optionCbs.length) {
+            delete summaryState.filters[col];
+          } else {
+            summaryState.filters[col] = new Set(selected);
+          }
+          popup.classList.add("hidden");
+          rerenderAllFromFilters();
+        });
+        resetBtn.addEventListener("click", () => {
+          delete summaryState.filters[col];
+          optionCbs.forEach(cb => { cb.checked = true; });
+          if (allCb) allCb.checked = true;
+          if (search) { search.value = ""; optionCbs.forEach(cb => cb.parentElement.style.display = ""); }
+          popup.classList.add("hidden");
+          rerenderAllFromFilters();
+        });
+      });
+
+      const clearAll = $("summaryClearAll");
+      if (clearAll) clearAll.addEventListener("click", () => {
+        summaryState.filters = {};
+        renderSummaryFilterBar();
+        rerenderAllFromFilters();
+      });
+    }
+
+    function updateSummaryFilterStatus(totalRows, filteredRows) {
+      const el = $("summaryFilterStatus");
+      if (!el) return;
+      const active = Object.entries(summaryState.filters).filter(([, s]) => s && s.size > 0);
+      if (!active.length) { el.style.display = "none"; el.innerHTML = ""; return; }
+      el.style.display = "block";
+      const labelMap = Object.fromEntries(SUMMARY_FILTERS.map(f => [f.key, f.label]));
+      const parts = active.map(([k, s]) => `${labelMap[k] || k} ${s.size}개`);
+      el.innerHTML = `필터: ${parts.join(" · ")} → <b>${filteredRows.toLocaleString("ko-KR")}</b> / ${totalRows.toLocaleString("ko-KR")}행`;
+    }
+
+    // ===== SUMMARY 테이블 렌더 =====
+    const SUMMARY_METRIC_COLS = [
+      ["IMPs", "impressions", "number"],
+      ["Click", "clicks", "number"],
+      ["CTR", "ctr", "percent"],
+      ["View", "video_views", "number_nullable"],
+      ["VTR", "vtr", "percent_nullable"],
+      ["Conversion", "conversions", "number"],
+      ["CVR", "cvr", "percent"],
+      ["Spend", "spend", "currency"],
+      ["CPM", "cpm", "currency"],
+      ["CPC", "cpc", "currency"],
+      ["CPV", "cpv", "currency_nullable"],
+      ["CPA", "cpa", "currency"],
+    ];
+
+    function fmtMetricCell(val, type) {
+      if (val === null || val === undefined) {
+        if (type === "number_nullable" || type === "percent_nullable" || type === "currency_nullable") {
+          return '<td class="metric-none"></td>';
+        }
+        return '<td>-</td>';
+      }
+      let display;
+      if (type === "number") display = fmtNumber(val);
+      else if (type === "percent" || type === "percent_nullable") display = fmtPercent(val);
+      else if (type === "currency" || type === "currency_nullable") display = fmtCurrency(val);
+      else if (type === "number_nullable") display = fmtNumber(val);
+      else display = val;
+      return `<td>${display}</td>`;
+    }
+
+    function buildSummaryRowHtml(targetLabel, targetingLabel, metrics, rowCls) {
+      const tdTarget = `<td class="col-target">${escHtml(targetLabel)}</td>`;
+      const tdTargeting = `<td class="col-targeting">${escHtml(targetingLabel)}</td>`;
+      const tdMetrics = SUMMARY_METRIC_COLS.map(([_, key, type]) => fmtMetricCell(metrics[key], type)).join("");
+      return `<tr class="${rowCls}">${tdTarget}${tdTargeting}${tdMetrics}</tr>`;
+    }
+
+    function renderSummaryTable() {
+      const tbl = $("summaryTable");
+      if (!tbl) return;
+      const thead = tbl.querySelector("thead");
+      const tbody = tbl.querySelector("tbody");
+
+      const headers = ["Target", "Targeting", ...SUMMARY_METRIC_COLS.map(c => c[0])];
+      thead.innerHTML = "<tr>" + headers.map(h => `<th>${h}</th>`).join("") + "</tr>";
+
+      const filtered = applySummaryFilters();
+      updateSummaryFilterStatus(summaryState.allRows.length, filtered.length);
+
+      if (!filtered.length) {
+        tbody.innerHTML = `<tr><td colspan="${headers.length}" style="text-align:center;color:var(--muted);padding:20px">조건에 맞는 데이터가 없습니다.</td></tr>`;
+        return;
+      }
+
+      // Target → Targeting → rows
+      const grouped = {};
+      for (const r of filtered) {
+        const t = r._target || "기타";
+        const tg = r._targeting || "기타";
+        if (!grouped[t]) grouped[t] = {};
+        if (!grouped[t][tg]) grouped[t][tg] = [];
+        grouped[t][tg].push(r);
+      }
+      const targetOrder = ["Adults", "Young Learners", "Kinder"];
+      const sortedTargets = Object.keys(grouped).sort((a, b) => {
+        const ia = targetOrder.indexOf(a); const ib = targetOrder.indexOf(b);
+        if (ia === -1 && ib === -1) return a.localeCompare(b);
+        if (ia === -1) return 1;
+        if (ib === -1) return -1;
+        return ia - ib;
+      });
+
+      const out = [];
+      for (const target of sortedTargets) {
+        const targetingMap = grouped[target];
+        const targetingKeys = Object.keys(targetingMap).sort();
+        let firstRow = true;
+        for (const tg of targetingKeys) {
+          const m = aggregateMetrics(targetingMap[tg]);
+          out.push(buildSummaryRowHtml(firstRow ? target : "", tg, m, "data-row"));
+          firstRow = false;
+        }
+        const subRows = Object.values(targetingMap).flat();
+        const subM = aggregateMetrics(subRows);
+        out.push(buildSummaryRowHtml("", "Sub Total", subM, "subtotal-row"));
+      }
+      const totalM = aggregateMetrics(filtered);
+      out.push(buildSummaryRowHtml("Total", "", totalM, "total-row"));
+
+      tbody.innerHTML = out.join("");
+    }
+
+    // 필터 변경 시 모든 영역 재렌더 (Summary + 상세 표 + 차트 + 인사이트 카드)
+    function rerenderAllFromFilters() {
+      // SUMMARY 측 필터 → tableState 측 필터에도 반영해서 통일 (column 헤더 필터는 추가 좁히기용)
+      tableState.filters = {};
+      for (const [k, s] of Object.entries(summaryState.filters)) {
+        if (s && s.size > 0 && k !== "_target" && k !== "_targeting") {
+          tableState.filters[k] = new Set(s);
+        }
+      }
+      const filtered = applySummaryFilters();
+      tableState.allRows = filtered;
+      renderSummary(filtered);
+      renderSummaryTable();
+      renderTableHeader(filtered, tableState.level);
+      renderTableBody(filtered, tableState.level);
+      renderChart(filtered, tableState.level);
+    }
+
+    // ===== 테이블 상태 + 필터 =====
+    const FILTERABLE_KEYS = ["campaign_name", "adset_name", "ad_name"];
+    const FILTER_LABELS = { campaign_name: "캠페인", adset_name: "광고세트", ad_name: "광고" };
+    let tableState = { allRows: [], level: "campaign", filters: {} };
+
+    function escHtml(s) {
+      return String(s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+    }
+
+    function applyFilters() {
+      const { allRows, filters } = tableState;
+      const activeKeys = Object.keys(filters).filter(k => filters[k] && filters[k].size > 0);
+      if (!activeKeys.length) return allRows;
+      return allRows.filter(row => activeKeys.every(k => filters[k].has(row[k] || "")));
+    }
+
+    function updateFilterSummary(totalRows, filteredRows) {
+      const el = $("filterSummary");
+      if (!el) return;
+      const active = Object.entries(tableState.filters).filter(([, s]) => s && s.size > 0);
+      if (!active.length) {
+        el.classList.remove("show");
+        el.innerHTML = "";
+        return;
+      }
+      const parts = active.map(([k, s]) => `${FILTER_LABELS[k] || k} ${s.size}개`);
+      el.classList.add("show");
+      el.innerHTML = `필터 적용 중: ${parts.join(" · ")} → <b>${filteredRows.toLocaleString("ko-KR")}</b> / ${totalRows.toLocaleString("ko-KR")}행 <span class="clear-all" id="clearAllFilters">모두 초기화</span>`;
+      const clearBtn = document.getElementById("clearAllFilters");
+      if (clearBtn) clearBtn.addEventListener("click", () => {
+        tableState.filters = {};
+        // 모든 필터 컨트롤 UI 동기화
+        document.querySelectorAll(".filter-control").forEach(c => {
+          c.classList.remove("active");
+          c.querySelector(".filter-toggle").textContent = "전체 ▾";
+          c.querySelectorAll(".filter-options input[type=checkbox]").forEach(cb => cb.checked = true);
+          const allCb = c.querySelector(".filter-all-cb");
+          if (allCb) allCb.checked = true;
+        });
+        applyFiltersAndRender();
+      });
+    }
+
+    function renderTableHeader(allRows, level) {
       const dimCols = COLUMN_DEFS[level] || COLUMN_DEFS.campaign;
       const cols = [...dimCols, ...METRIC_COLS];
-
       const thead = tableEl.querySelector("thead");
+
+      let html = "<tr>" + cols.map(c => `<th>${c[0]}</th>`).join("") + "</tr>";
+
+      // 필터 가능한 dim col이 있을 때만 필터 행 생성
+      const hasFilterCols = dimCols.some(([, key]) => FILTERABLE_KEYS.includes(key));
+      if (hasFilterCols) {
+        html += "<tr class='filter-row'>";
+        for (const [label, key, type] of cols) {
+          if (FILTERABLE_KEYS.includes(key) && type === "text") {
+            const uniques = [...new Set(allRows.map(r => (r[key] || "").toString()))]
+              .filter(v => v !== "")
+              .sort();
+            const activeSet = tableState.filters[key];
+            const activeCnt = activeSet ? activeSet.size : 0;
+            const btnLabel = activeCnt > 0 ? `${activeCnt}개 선택 ▾` : "전체 ▾";
+            const activeCls = activeCnt > 0 ? "active" : "";
+            const isChecked = (v) => (!activeSet || activeSet.size === 0 || activeSet.has(v)) ? "checked" : "";
+            const allChecked = (!activeSet || activeSet.size === 0) ? "checked" : "";
+            html += `<td>
+              <div class="filter-control ${activeCls}" data-col="${key}">
+                <button type="button" class="filter-toggle">${btnLabel}</button>
+                <div class="filter-popup hidden">
+                  <input type="text" class="filter-search" placeholder="검색 (부분일치)..." />
+                  <label class="filter-all-row"><input type="checkbox" class="filter-all-cb" ${allChecked}> (전체 선택)</label>
+                  <div class="filter-options">
+                    ${uniques.length ? uniques.map(v => `<label title="${escHtml(v)}"><input type="checkbox" value="${escHtml(v)}" ${isChecked(v)}> ${escHtml(v)}</label>`).join("") : '<div class="filter-empty">옵션 없음</div>'}
+                  </div>
+                  <div class="filter-actions">
+                    <button type="button" class="primary filter-apply">적용</button>
+                    <button type="button" class="secondary filter-reset">초기화</button>
+                  </div>
+                </div>
+              </div>
+            </td>`;
+          } else {
+            html += "<td></td>";
+          }
+        }
+        html += "</tr>";
+      }
+
+      thead.innerHTML = html;
+      attachFilterEvents();
+    }
+
+    function renderTableBody(rows, level) {
+      const dimCols = COLUMN_DEFS[level] || COLUMN_DEFS.campaign;
+      const cols = [...dimCols, ...METRIC_COLS];
       const tbody = tableEl.querySelector("tbody");
-      thead.innerHTML = "<tr>" + cols.map(c => `<th>${c[0]}</th>`).join("") + "</tr>";
 
       if (!rows.length) {
-        tbody.innerHTML = `<tr><td colspan="${cols.length}" style="text-align:center;color:var(--muted);padding:24px">데이터가 없습니다.</td></tr>`;
+        const hasActive = Object.values(tableState.filters).some(s => s && s.size > 0);
+        const msg = hasActive ? "필터 조건에 맞는 행이 없습니다." : "데이터가 없습니다.";
+        tbody.innerHTML = `<tr><td colspan="${cols.length}" style="text-align:center;color:var(--muted);padding:24px">${msg}</td></tr>`;
         return;
       }
 
       tbody.innerHTML = rows.map(row => {
         return "<tr>" + cols.map(([_, key, type]) => {
           const v = row[key];
-          let display = v ?? "-";
+          if (type === "number_nullable" || type === "percent_nullable") {
+            if (v === null || v === undefined) return '<td class="no-data"></td>';
+            return type === "percent_nullable" ? `<td>${fmtPercent(v)}</td>` : `<td>${fmtNumber(v)}</td>`;
+          }
+          let display = (v === null || v === undefined) ? "-" : v;
           if (type === "number") display = fmtNumber(v);
           else if (type === "currency") display = fmtCurrency(v);
           else if (type === "percent") display = fmtPercent(v);
           return `<td>${display}</td>`;
         }).join("") + "</tr>";
       }).join("");
+    }
+
+    function attachFilterEvents() {
+      document.querySelectorAll("#resultTable .filter-control").forEach(control => {
+        const col = control.dataset.col;
+        const toggle = control.querySelector(".filter-toggle");
+        const popup = control.querySelector(".filter-popup");
+        const search = control.querySelector(".filter-search");
+        const allCb = control.querySelector(".filter-all-cb");
+        const optionCbs = control.querySelectorAll(".filter-options input[type=checkbox]");
+        const applyBtn = control.querySelector(".filter-apply");
+        const resetBtn = control.querySelector(".filter-reset");
+
+        toggle.addEventListener("click", (e) => {
+          e.stopPropagation();
+          document.querySelectorAll("#resultTable .filter-popup").forEach(p => {
+            if (p !== popup) p.classList.add("hidden");
+          });
+          popup.classList.toggle("hidden");
+          if (!popup.classList.contains("hidden")) {
+            search.focus();
+            search.select();
+          }
+        });
+
+        search.addEventListener("input", () => {
+          const q = search.value.toLowerCase();
+          optionCbs.forEach(cb => {
+            const lbl = cb.parentElement;
+            lbl.style.display = cb.value.toLowerCase().includes(q) ? "" : "none";
+          });
+        });
+
+        if (allCb) {
+          allCb.addEventListener("change", () => {
+            optionCbs.forEach(cb => {
+              const lbl = cb.parentElement;
+              if (lbl.style.display !== "none") cb.checked = allCb.checked;
+            });
+          });
+        }
+
+        // 개별 체크박스 변경 시 (전체 선택) 동기화
+        optionCbs.forEach(cb => {
+          cb.addEventListener("change", () => {
+            const visibleCbs = [...optionCbs].filter(c => c.parentElement.style.display !== "none");
+            if (allCb) allCb.checked = visibleCbs.every(c => c.checked);
+          });
+        });
+
+        applyBtn.addEventListener("click", () => {
+          const selected = [...optionCbs].filter(cb => cb.checked).map(cb => cb.value);
+          if (selected.length === 0 || selected.length === optionCbs.length) {
+            delete tableState.filters[col];
+          } else {
+            tableState.filters[col] = new Set(selected);
+          }
+          popup.classList.add("hidden");
+          applyFiltersAndRender();
+        });
+
+        resetBtn.addEventListener("click", () => {
+          delete tableState.filters[col];
+          optionCbs.forEach(cb => { cb.checked = true; });
+          if (allCb) allCb.checked = true;
+          if (search) {
+            search.value = "";
+            optionCbs.forEach(cb => { cb.parentElement.style.display = ""; });
+          }
+          popup.classList.add("hidden");
+          applyFiltersAndRender();
+        });
+      });
+    }
+
+    // 팝업 바깥 클릭 시 닫기 (한 번만 등록)
+    document.addEventListener("click", (e) => {
+      if (!e.target.closest("#resultTable .filter-control")) {
+        document.querySelectorAll("#resultTable .filter-popup").forEach(p => p.classList.add("hidden"));
+      }
+    });
+
+    function updateFilterToggleLabels() {
+      document.querySelectorAll("#resultTable .filter-control").forEach(control => {
+        const col = control.dataset.col;
+        const set = tableState.filters[col];
+        const toggle = control.querySelector(".filter-toggle");
+        const cnt = set ? set.size : 0;
+        toggle.textContent = cnt > 0 ? `${cnt}개 선택 ▾` : "전체 ▾";
+        control.classList.toggle("active", cnt > 0);
+      });
+    }
+
+    function applyFiltersAndRender() {
+      const filtered = applyFilters();
+      renderSummary(filtered);
+      renderTableBody(filtered, tableState.level);
+      renderChart(filtered, tableState.level);
+      updateFilterToggleLabels();
+      updateFilterSummary(tableState.allRows.length, filtered.length);
+    }
+
+    function renderTable(rows, level) {
+      tableState.allRows = rows;
+      tableState.level = level;
+      tableState.filters = {};
+      renderTableHeader(rows, level);
+      renderTableBody(rows, level);
+      updateFilterSummary(rows.length, rows.length);
     }
 
     function renderSummary(rows) {
@@ -566,12 +1468,23 @@
     }
 
     function renderChart(rows, level) {
+      // ad 레벨은 일자별 분해라 같은 ad가 여러 날짜에 걸쳐 있음 → 광고별 합산 후 top 10
+      let aggregated = rows;
+      if (level === "ad") {
+        const byAd = {};
+        for (const r of rows) {
+          const k = r.ad_name || "(이름 없음)";
+          if (!byAd[k]) byAd[k] = { ad_name: k, spend: 0 };
+          byAd[k].spend += Number(r.spend) || 0;
+        }
+        aggregated = Object.values(byAd);
+      }
       const labelKey = level === "ad" ? "ad_name"
                      : level === "adset" ? "adset_name"
                      : level === "account" ? "account_id"
                      : "campaign_name";
 
-      const top = [...rows]
+      const top = [...aggregated]
         .sort((a, b) => (Number(b.spend) || 0) - (Number(a.spend) || 0))
         .slice(0, 10);
 
@@ -623,6 +1536,7 @@
           summaryEl.style.display = "none";
           chartCard.style.display = "none";
           tableCard.style.display = "none";
+          breakdownCard.style.display = "none";
           return;
         }
         clearStatus();
@@ -632,14 +1546,29 @@
           summaryEl.style.display = "none";
           chartCard.style.display = "none";
           tableCard.style.display = "none";
+          breakdownCard.style.display = "none";
           return;
         }
+        annotateRows(rows);
+        // SUMMARY 상태에 raw rows 저장 (필터 가능한 ad-level이 가장 풍부하지만 다른 level도 동작)
+        summaryState.allRows = rows;
+        summaryState.level = levelEl.value;
+        summaryState.filters = {};
+
         renderSummary(rows);
         renderTable(rows, levelEl.value);
         renderChart(rows, levelEl.value);
+        renderSummaryFilterBar();
+        renderSummaryTable();
+
         summaryEl.style.display = "grid";
         chartCard.style.display = "block";
         tableCard.style.display = "block";
+        const sc = document.getElementById("summaryCard");
+        if (sc) sc.style.display = "block";
+
+        // 타겟×에셋 분해도 함께 로드
+        loadBreakdown();
       } catch (e) {
         setStatus("error", `오류: ${e.message}`);
       } finally {
@@ -655,8 +1584,265 @@
       window.location.href = `/api/insights.csv?${qs}`;
     }
 
+    // ===== 진행률 override (localStorage 영속화) =====
+    function getOverrides() {
+      try {
+        return JSON.parse(localStorage.getItem("progressOverrides") || "{}");
+      } catch { return {}; }
+    }
+    function setOverride(accountId, campaignId, val) {
+      const all = getOverrides();
+      if (!all[accountId]) all[accountId] = {};
+      if (val === null) {
+        delete all[accountId][campaignId];
+      } else {
+        all[accountId][campaignId] = val;
+      }
+      localStorage.setItem("progressOverrides", JSON.stringify(all));
+    }
+    function serializeOverrides() {
+      const all = getOverrides();
+      if (!currentAccountId || !all[currentAccountId]) return "";
+      return Object.entries(all[currentAccountId])
+        .map(([cid, v]) => `${cid}:${v.start}:${v.stop}`)
+        .join(",");
+    }
+
+    // ===== Breakdown 카드 =====
+    const breakdownCard = $("breakdownCard");
+    const breakdownLoading = $("breakdownLoading");
+    const breakdownError = $("breakdownError");
+    const breakdownList = $("breakdownList");
+
+    function fmtPct1(v) {
+      if (v === null || v === undefined) return "—";
+      return v.toFixed(1) + "%";
+    }
+    function fmtWon(v) {
+      if (v === null || v === undefined) return "—";
+      return Math.round(v).toLocaleString("ko-KR") + "원";
+    }
+    function fmtCount(v) {
+      if (v === null || v === undefined) return "—";
+      return Math.round(v).toLocaleString("ko-KR");
+    }
+
+    function spendPaceClass(time_pct, spend_pct) {
+      if (spend_pct === null || time_pct === null) return "on";
+      if (spend_pct > 100) return "over-100";
+      if (spend_pct > time_pct + 5) return "over";
+      if (spend_pct < time_pct - 5) return "under";
+      return "on";
+    }
+
+    function renderBreakdownCampaign(c) {
+      const sched = c.schedule || {};
+      const startDisp = sched.start ? sched.start.slice(0, 10) : "—";
+      const stopDisp = sched.stop ? sched.stop.slice(0, 10) : "진행중";
+      const ov = sched.override;
+      const ovStart = ov ? ov.start : (sched.start ? sched.start.slice(0, 10) : "");
+      const ovStop = ov ? ov.stop : (sched.stop ? sched.stop.slice(0, 10) : "");
+      const overrideBadge = ov ? '<span style="font-size:10px;background:#fff4e0;color:#a86b00;padding:2px 6px;border-radius:4px;margin-left:6px">수동 기간</span>' : '';
+
+      const totalBudget = c.budget && c.budget.total;
+      const budgetType = c.budget && c.budget.lifetime ? "lifetime" : (c.budget && c.budget.daily ? "daily" : null);
+      const budgetStr = totalBudget ? `${fmtWon(totalBudget)} (${budgetType})` : "예산 정보 없음";
+
+      const timePct = c.progress.time_pct;
+      const spendPct = c.progress.spend_pct;
+      const timeWidth = timePct === null ? 0 : Math.min(100, Math.max(0, timePct));
+      const spendWidth = spendPct === null ? 0 : Math.min(100, Math.max(0, spendPct));
+      const paceCls = spendPaceClass(timePct, spendPct);
+
+      const statusLower = (c.status || "").toLowerCase();
+      const statusCls = statusLower.includes("active") ? ""
+                      : statusLower.includes("paused") ? "paused"
+                      : "archived";
+
+      const m = c.metrics || {};
+      const metricsLine = `
+        <span>노출 <b>${fmtCount(m.impressions)}</b></span>
+        <span>클릭 <b>${fmtCount(m.clicks)}</b></span>
+        <span>CTR <b>${fmtPct1(m.ctr)}</b></span>
+        ${m.video_views !== null ? `<span>VIEW <b>${fmtCount(m.video_views)}</b></span>` : ''}
+        ${m.vtr !== null ? `<span>VTR <b>${fmtPct1(m.vtr)}</b></span>` : ''}
+        <span>전환 <b>${fmtCount(m.conversions)}</b></span>
+        <span>지출 <b>${fmtWon(m.spend)}</b></span>
+      `;
+
+      const adsetsHtml = (c.adsets || []).map(aset => {
+        const am = aset.metrics || {};
+        const adsHtml = (aset.ads || []).map(ad => {
+          const adm = ad.metrics || {};
+          return `<div class="breakdown-ad">
+            <span class="breakdown-ad-name">${ad.name || "(이름 없음)"}</span>
+            <span class="breakdown-ad-metrics">
+              imp ${fmtCount(adm.impressions)} · clk ${fmtCount(adm.clicks)} · CTR ${fmtPct1(adm.ctr)}
+              ${adm.vtr !== null ? `· VTR ${fmtPct1(adm.vtr)}` : ''}
+              · 전환 ${fmtCount(adm.conversions)} · ${fmtWon(adm.spend)}
+            </span>
+          </div>`;
+        }).join("");
+        return `<div class="breakdown-adset">
+          <div class="breakdown-adset-name" data-toggle="ads"><span class="caret">▶</span> ${aset.name || "(이름 없음)"}</div>
+          <div class="breakdown-adset-metrics">
+            <span>지출 <b>${fmtWon(am.spend)}</b></span>
+            <span>노출 ${fmtCount(am.impressions)}</span>
+            <span>클릭 ${fmtCount(am.clicks)}</span>
+            <span>CTR ${fmtPct1(am.ctr)}</span>
+            ${am.vtr !== null ? `<span>VTR ${fmtPct1(am.vtr)}</span>` : ''}
+            <span>전환 ${fmtCount(am.conversions)}</span>
+          </div>
+          <div class="breakdown-ads">${adsHtml}</div>
+        </div>`;
+      }).join("");
+
+      return `
+        <div class="breakdown-campaign" data-cid="${c.id}">
+          <div class="breakdown-camp-header" data-toggle="adsets">
+            <div class="breakdown-camp-name">
+              <span class="caret">▶</span>
+              ${c.name || "(이름 없음)"}
+              <span class="camp-status-badge ${statusCls}">${c.status || "?"}</span>
+              ${overrideBadge}
+            </div>
+            <div class="breakdown-camp-meta">
+              일정: ${startDisp} ~ ${stopDisp} · 예산: ${budgetStr} · 누적 spend ${fmtWon(c.progress.cumul_spend)}
+              <button class="breakdown-edit-btn" data-action="edit-period">기간 수정</button>
+            </div>
+            <div class="progress-pair">
+              <div class="progress-block">
+                <div class="progress-label"><span>진행률 (시간)</span><span class="progress-pct">${fmtPct1(timePct)}</span></div>
+                <div class="progress-track"><div class="progress-fill time" style="width:${timeWidth}%"></div></div>
+              </div>
+              <div class="progress-block">
+                <div class="progress-label"><span>소진률 (예산)</span><span class="progress-pct">${fmtPct1(spendPct)}</span></div>
+                <div class="progress-track"><div class="progress-fill spend ${paceCls}" style="width:${spendWidth}%"></div></div>
+              </div>
+            </div>
+            <div class="breakdown-override-form" data-form="override">
+              <span style="font-size:12px;color:var(--muted)">진행률 기간:</span>
+              <input type="date" data-input="ov-start" value="${ovStart}" />
+              <span>~</span>
+              <input type="date" data-input="ov-stop" value="${ovStop}" />
+              <button class="primary" data-action="ov-apply">적용</button>
+              <button class="secondary" data-action="ov-reset">기본값</button>
+            </div>
+            <div class="camp-period-metrics">${metricsLine}</div>
+          </div>
+          <div class="breakdown-adsets">${adsetsHtml}</div>
+        </div>
+      `;
+    }
+
+    function attachBreakdownEvents() {
+      breakdownList.querySelectorAll(".breakdown-campaign").forEach(campEl => {
+        const cid = campEl.dataset.cid;
+
+        // 캠페인 토글 (adsets 펼치기/접기)
+        const header = campEl.querySelector(".breakdown-camp-header");
+        header.addEventListener("click", (e) => {
+          // 버튼/입력 클릭은 무시
+          if (e.target.closest("button") || e.target.closest("input") || e.target.closest(".breakdown-override-form")) return;
+          const list = campEl.querySelector(".breakdown-adsets");
+          const caret = campEl.querySelector(".breakdown-camp-name .caret");
+          list.classList.toggle("open");
+          caret.classList.toggle("open");
+        });
+
+        // 기간 수정 버튼
+        const editBtn = campEl.querySelector('[data-action="edit-period"]');
+        editBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const form = campEl.querySelector('[data-form="override"]');
+          form.classList.toggle("show");
+        });
+
+        // 적용
+        const applyBtn = campEl.querySelector('[data-action="ov-apply"]');
+        applyBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const start = campEl.querySelector('[data-input="ov-start"]').value;
+          const stop = campEl.querySelector('[data-input="ov-stop"]').value;
+          if (!start || !stop) { alert("시작/종료일을 모두 입력해주세요."); return; }
+          setOverride(currentAccountId, cid, { start, stop });
+          loadBreakdown();
+        });
+
+        // 기본값
+        const resetBtn = campEl.querySelector('[data-action="ov-reset"]');
+        resetBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          setOverride(currentAccountId, cid, null);
+          loadBreakdown();
+        });
+
+        // 광고세트 토글
+        campEl.querySelectorAll(".breakdown-adset").forEach(asetEl => {
+          const nameEl = asetEl.querySelector(".breakdown-adset-name");
+          nameEl.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const ads = asetEl.querySelector(".breakdown-ads");
+            const caret = nameEl.querySelector(".caret");
+            ads.classList.toggle("open");
+            caret.classList.toggle("open");
+          });
+        });
+      });
+    }
+
+    async function loadBreakdown() {
+      if (!breakdownCard || !currentAccountId) return;
+      breakdownCard.style.display = "block";
+      breakdownLoading.style.display = "block";
+      breakdownError.style.display = "none";
+      breakdownList.innerHTML = "";
+
+      let qs;
+      try { qs = buildQuery(); }
+      catch { breakdownLoading.style.display = "none"; return; }
+
+      const overrideStr = serializeOverrides();
+      if (overrideStr) qs += `&override=${encodeURIComponent(overrideStr)}`;
+
+      try {
+        const res = await fetch(`/api/breakdown?${qs}`);
+        const data = await res.json();
+        breakdownLoading.style.display = "none";
+        if (!res.ok || data.error) {
+          breakdownError.style.display = "block";
+          breakdownError.textContent = data.error || `요청 실패 (${res.status})`;
+          return;
+        }
+        const camps = data.campaigns || [];
+        if (!camps.length) {
+          breakdownList.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:12px 0">선택한 기간에 활성 캠페인 데이터가 없습니다.</div>';
+          return;
+        }
+        breakdownList.innerHTML = camps.map(renderBreakdownCampaign).join("");
+        attachBreakdownEvents();
+      } catch (e) {
+        breakdownLoading.style.display = "none";
+        breakdownError.style.display = "block";
+        breakdownError.textContent = `오류: ${e.message}`;
+      }
+    }
+
+    function downloadXlsx() {
+      let qs;
+      try { qs = buildQuery(); }
+      catch (e) { setStatus("error", e.message); return; }
+      const overrideStr = serializeOverrides();
+      if (overrideStr) qs += `&override=${encodeURIComponent(overrideStr)}`;
+      setStatus("loading", "Excel 생성 중...");
+      window.location.href = `/api/view.xlsx?${qs}`;
+      setTimeout(clearStatus, 2500);
+    }
+
     fetchBtn.addEventListener("click", fetchInsights);
     csvBtn.addEventListener("click", downloadCsv);
+    const xlsxBtn = $("xlsxBtn");
+    if (xlsxBtn) xlsxBtn.addEventListener("click", downloadXlsx);
 
     // ===== 주간 인사이트 =====
     const insightCard = $("insightCard");
@@ -757,12 +1943,20 @@
       summaryEl.style.display = "none";
       chartCard.style.display = "none";
       tableCard.style.display = "none";
+      const sc = document.getElementById("summaryCard");
+      if (sc) sc.style.display = "none";
+      const bc = document.getElementById("breakdownCard");
+      if (bc) bc.style.display = "none";
       emptyCard.style.display = "block";
       clearStatus();
     }
 
+    let accountsMap = {};
+
     function renderAccountOptions(accounts, selectId) {
       if (!accountSelect) return;
+      accountsMap = {};
+      accounts.forEach(a => { accountsMap[a.id] = a; });
       if (!accounts.length) {
         accountSelect.innerHTML = '<option value="">등록된 계정 없음 — ＋ 버튼으로 추가</option>';
         accountSelect.disabled = true;
