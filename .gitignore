@@ -1,8 +1,42 @@
+# 본인 자격 증명 및 계정 — 절대 공유 금지
 .env
 accounts.json
+
+# Python 캐시
 __pycache__/
 *.pyc
+*.pyo
+
+# 가상 환경
 .venv/
 venv/
+env/
+ENV/
+
+# 에디터
 .idea/
 .vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# 임시 파일
+*.tmp
+*.log
+*.bak
+
+# Claude 로컬 세션/설정 (공유 X)
+# CLAUDE.md 와 README.md 는 git에 포함됨 — 컨텍스트는 공유하되 로컬 세션 데이터는 제외
+.claude/
+.anthropic/
+.aider*
+.cursor*
+.copilot*
+
+# 이전 작업 흔적 (BC 템플릿 폐기)
+templates_data/
+template_reference.xlsx
+_template_extracted/
+_strings_dump.txt
+_parse_sheet.ps1
